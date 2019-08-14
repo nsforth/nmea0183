@@ -15,6 +15,7 @@ pub struct RMC {
 }
 
 impl RMC {
+    #[inline(never)]
     pub(crate) fn parse_rmc<'a>(
         source: Source,
         fields: &mut core::str::Split<'a, char>,

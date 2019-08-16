@@ -16,6 +16,14 @@ pub struct Latitude {
     pub hemisphere: Hemisphere,
 }
 
+impl TryFrom<f32> for Latitude {
+    type Error = &'static str;
+
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        TryFrom::try_from(value as f64)
+    }
+}
+
 impl TryFrom<f64> for Latitude {
     type Error = &'static str;
 
@@ -87,6 +95,14 @@ impl Latitude {
             Hemisphere::West => panic!("Wrong West hemisphere for latitude!"),
         }
     }
+
+    pub fn is_north(&self) -> bool {
+        self.hemisphere == Hemisphere::North
+    }
+
+    pub fn is_south(&self) -> bool {
+        self.hemisphere == Hemisphere::South
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -95,6 +111,14 @@ pub struct Longitude {
     pub minutes: u8,
     pub seconds: f32,
     pub hemisphere: Hemisphere,
+}
+
+impl TryFrom<f32> for Longitude {
+    type Error = &'static str;
+
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        TryFrom::try_from(value as f64)
+    }
 }
 
 impl TryFrom<f64> for Longitude {
@@ -162,26 +186,78 @@ impl Longitude {
         let result =
             self.degrees as f64 + (self.minutes as f64) / 60f64 + (self.seconds as f64) / 3600f64;
         match self.hemisphere {
-            Hemisphere::West => result,
-            Hemisphere::East => -result,
+            Hemisphere::West => -result,
+            Hemisphere::East => result,
             Hemisphere::North => panic!("Wrong North hemisphere for latitude!"),
             Hemisphere::South => panic!("Wrong South hemisphere for latitude!"),
         }
     }
+
+    pub fn is_west(&self) -> bool {
+        self.hemisphere == Hemisphere::West
+    }
+
+    pub fn is_east(&self) -> bool {
+        self.hemisphere == Hemisphere::East
+    }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Altitude {
     meters: f32,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Speed {
     knots: f32,
 }
 
+impl Speed {
+    pub fn from_knots(speed: f32) -> Speed {
+        Speed { knots: speed }
+    }
+    pub fn from_mps(speed: f32) -> Speed {
+        Speed {
+            knots: speed * 1.94384f32,
+        }
+    }
+    pub fn from_mph(speed: f32) -> Speed {
+        Speed {
+            knots: speed * 0.868976f32,
+        }
+    }
+    pub fn from_kph(speed: f32) -> Speed {
+        Speed {
+            knots: speed * 0.539957f32,
+        }
+    }
+    pub fn as_kph(&self) -> f32 {
+        self.knots * 1.852
+    }
+    pub fn as_mph(&self) -> f32 {
+        self.knots * 1.15078
+    }
+    pub fn as_mps(&self) -> f32 {
+        self.knots * 0.514444
+    }
+    pub(crate) fn parse_from_knots(input: Option<&str>) -> Result<Option<Self>, &'static str> {
+        if let Some(speed) = input {
+            let knots = speed
+                .parse::<f32>()
+                .map_err(|_| "Wrong speed field format")?;
+            Ok(Some(Speed { knots }))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub struct Course {
     degrees: f32,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct MagneticVariation {
     degrees: f32,
 }

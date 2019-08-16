@@ -227,7 +227,7 @@ fn test_correct_rmc() {
                     latitude: TryFrom::try_from(55.703981666666664).unwrap(),
                     longitude: TryFrom::try_from(37.69343833333333).unwrap(),
                     speed: coords::Speed::from_knots(0.06),
-                    course: 25.82,
+                    course: From::from(25.82),
                     magnetic: None,
                     mode: modes::Mode::Autonomous
                 })))
@@ -268,8 +268,8 @@ fn test_correct_rmc2() {
                     latitude: TryFrom::try_from(55.810116666666666).unwrap(),
                     longitude: TryFrom::try_from(37.65645).unwrap(),
                     speed: coords::Speed::from_knots(0.01),
-                    course: 255.6,
-                    magnetic: Some(8.7),
+                    course: From::from(255.6),
+                    magnetic: Some(From::from(246.90001)),
                     mode: modes::Mode::Autonomous
                 })))
             );
@@ -307,7 +307,7 @@ fn test_parser_iterator() {
                 latitude: TryFrom::try_from(55.703981666666664).unwrap(),
                 longitude: TryFrom::try_from(37.69343833333333).unwrap(),
                 speed: coords::Speed::from_knots(0.06),
-                course: 25.82,
+                course: From::from(25.82),
                 magnetic: None,
                 mode: modes::Mode::Autonomous
             })))
@@ -345,7 +345,7 @@ fn test_parser_iterator() {
                 latitude: TryFrom::try_from(55.703981666666664).unwrap(),
                 longitude: TryFrom::try_from(37.69343833333333).unwrap(),
                 speed: coords::Speed::from_knots(0.06),
-                course: 25.82,
+                course: From::from(25.82),
                 magnetic: None,
                 mode: modes::Mode::Autonomous
             })))

@@ -240,7 +240,7 @@ impl Speed {
     pub fn as_mps(&self) -> f32 {
         self.knots * 0.514444
     }
-    pub(crate) fn parse_from_knots(input: Option<&str>) -> Result<Option<Self>, &'static str> {
+    pub(crate) fn parse(input: Option<&str>) -> Result<Option<Self>, &'static str> {
         if let Some(speed) = input {
             let knots = speed
                 .parse::<f32>()
@@ -257,7 +257,57 @@ pub struct Course {
     degrees: f32,
 }
 
+impl From<f32> for Course {
+    fn from(value: f32) -> Self {
+        Course { degrees: value }
+    }
+}
+
+impl Course {
+    pub(crate) fn parse(input: Option<&str>) -> Result<Option<Self>, &'static str> {
+        if let Some(course) = input {
+            let degrees = course
+                .parse::<f32>()
+                .map_err(|_| "Wrong course field format!")?;
+            Ok(Some(Course { degrees }))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
-pub struct MagneticVariation {
+pub struct MagneticCourse {
     degrees: f32,
+}
+
+impl From<f32> for MagneticCourse {
+    fn from(value: f32) -> Self {
+        MagneticCourse { degrees: value }
+    }
+}
+
+impl MagneticCourse {
+    pub(crate) fn parse(
+        true_course: &Option<Course>,
+        mvar: Option<&str>,
+        mdir: Option<&str>,
+    ) -> Result<Option<Self>, &'static str> {
+        if let (Some(course), Some(variation), Some(direction)) = (true_course, mvar, mdir) {
+            let magnetic = variation
+                .parse::<f32>()
+                .map_err(|_| "Wrong magnetic variation field format!")?;
+            match direction {
+                "E" => Ok(Some(MagneticCourse {
+                    degrees: course.degrees - magnetic,
+                })),
+                "W" => Ok(Some(MagneticCourse {
+                    degrees: course.degrees + magnetic,
+                })),
+                _ => Err("Wrong direction field for magnetic variation"),
+            }
+        } else {
+            Ok(None)
+        }
+    }
 }

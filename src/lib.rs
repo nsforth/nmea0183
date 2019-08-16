@@ -4,6 +4,7 @@ use core::slice::Iter;
 
 pub mod coords;
 pub mod datetime;
+pub mod modes;
 pub mod rmc;
 
 #[derive(Debug, PartialEq)]
@@ -228,7 +229,7 @@ fn test_correct_rmc() {
                     speed: coords::Speed::from_knots(0.06),
                     course: 25.82,
                     magnetic: None,
-                    mode: rmc::RMCMode::Autonomous
+                    mode: modes::Mode::Autonomous
                 })))
             );
             parsed = true;
@@ -269,7 +270,7 @@ fn test_correct_rmc2() {
                     speed: coords::Speed::from_knots(0.01),
                     course: 255.6,
                     magnetic: Some(8.7),
-                    mode: rmc::RMCMode::Autonomous
+                    mode: modes::Mode::Autonomous
                 })))
             );
             parsed = true;
@@ -308,7 +309,7 @@ fn test_parser_iterator() {
                 speed: coords::Speed::from_knots(0.06),
                 course: 25.82,
                 magnetic: None,
-                mode: rmc::RMCMode::Autonomous
+                mode: modes::Mode::Autonomous
             })))
         );
     }
@@ -346,7 +347,7 @@ fn test_parser_iterator() {
                 speed: coords::Speed::from_knots(0.06),
                 course: 25.82,
                 magnetic: None,
-                mode: rmc::RMCMode::Autonomous
+                mode: modes::Mode::Autonomous
             })))
         );
         assert!(iter.next().is_none());

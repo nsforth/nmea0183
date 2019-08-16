@@ -2,6 +2,7 @@
 use core::convert::TryFrom;
 use core::slice::Iter;
 
+pub mod coords;
 pub mod datetime;
 pub mod rmc;
 
@@ -30,7 +31,6 @@ impl TryFrom<&str> for Source {
 #[derive(Debug, PartialEq)]
 pub enum ParseResult {
     RMC(Option<rmc::RMC>),
-    NeedMoreData,
 }
 
 pub struct Parser {
@@ -223,8 +223,8 @@ fn test_correct_rmc() {
                             seconds: 4.049
                         }
                     },
-                    latitude: 55.703981666666664,
-                    longitude: 37.69343833333333,
+                    latitude: TryFrom::try_from(55.703981666666664).unwrap(),
+                    longitude: TryFrom::try_from(37.69343833333333).unwrap(),
                     speed: 0.06,
                     course: 25.82,
                     magnetic: None,
@@ -264,8 +264,8 @@ fn test_correct_rmc2() {
                             seconds: 50.0
                         }
                     },
-                    latitude: 55.810116666666666,
-                    longitude: 37.65645,
+                    latitude: TryFrom::try_from(55.810116666666666).unwrap(),
+                    longitude: TryFrom::try_from(37.65645).unwrap(),
                     speed: 0.01,
                     course: 255.6,
                     magnetic: Some(8.7),
@@ -303,8 +303,8 @@ fn test_parser_iterator() {
                         seconds: 4.049
                     }
                 },
-                latitude: 55.703981666666664,
-                longitude: 37.69343833333333,
+                latitude: TryFrom::try_from(55.703981666666664).unwrap(),
+                longitude: TryFrom::try_from(37.69343833333333).unwrap(),
                 speed: 0.06,
                 course: 25.82,
                 magnetic: None,
@@ -341,8 +341,8 @@ fn test_parser_iterator() {
                         seconds: 4.049
                     }
                 },
-                latitude: 55.703981666666664,
-                longitude: 37.69343833333333,
+                latitude: TryFrom::try_from(55.703981666666664).unwrap(),
+                longitude: TryFrom::try_from(37.69343833333333).unwrap(),
                 speed: 0.06,
                 course: 25.82,
                 magnetic: None,

@@ -1,3 +1,4 @@
+use crate::coords::{Latitude, Longitude};
 use crate::datetime;
 use crate::Source;
 use core::convert::TryFrom;
@@ -6,8 +7,8 @@ use core::convert::TryFrom;
 pub struct RMC {
     pub source: Source,
     pub datetime: datetime::DateTime,
-    pub latitude: f64,
-    pub longitude: f64,
+    pub latitude: Latitude,
+    pub longitude: Longitude,
     pub speed: f32,
     pub course: f32,
     pub magnetic: Option<f32>,
@@ -15,7 +16,6 @@ pub struct RMC {
 }
 
 impl RMC {
-    #[inline(never)]
     pub(crate) fn parse_rmc<'a>(
         source: Source,
         fields: &mut core::str::Split<'a, char>,
@@ -44,54 +44,8 @@ impl RMC {
             "V" => Some(false),
             _ => None,
         });
-        let latitude = if let (Some(lat), Some(lat_ns)) = (f_lat, f_lat_ns) {
-            if lat.len() < 4 {
-                return Err("Latitude field is too short!");
-            }
-            let south = match lat_ns {
-                "N" => false,
-                "S" => true,
-                _ => return Err("Latitude N/S field has wrong format!"),
-            };
-            let degrees = lat[..2]
-                .parse::<u32>()
-                .map_err(|_| "Wrong latitude field format")?;
-            let minutes = lat[2..]
-                .parse::<f64>()
-                .map_err(|_| "Wrong latitude field format")?;
-            let result = (degrees as f64) + minutes / 60f64;
-            if south {
-                Some(-result)
-            } else {
-                Some(result)
-            }
-        } else {
-            None
-        };
-        let longitude = if let (Some(lon), Some(lon_ew)) = (f_lon, f_lon_ew) {
-            if lon.len() < 5 {
-                return Err("Longitude field is too short!");
-            }
-            let west = match lon_ew {
-                "E" => false,
-                "W" => true,
-                _ => return Err("Longitude E/W field has wrong format!"),
-            };
-            let degrees = lon[..3]
-                .parse::<u32>()
-                .map_err(|_| "Wrong longitude field format")?;
-            let minutes = lon[3..]
-                .parse::<f64>()
-                .map_err(|_| "Wrong longitude field format")?;
-            let result = (degrees as f64) + minutes / 60f64;
-            if west {
-                Some(-result)
-            } else {
-                Some(result)
-            }
-        } else {
-            None
-        };
+        let latitude = Latitude::parse(f_lat, f_lat_ns)?;
+        let longitude = Longitude::parse(f_lon, f_lon_ew)?;
         let speed = if let Some(spd) = f_speed {
             Some(spd.parse::<f32>().map_err(|_| "Wrong speed field format")?)
         } else {

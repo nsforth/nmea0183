@@ -19,7 +19,7 @@ impl RMC {
     pub(crate) fn parse_rmc<'a>(
         source: Source,
         fields: &mut core::str::Split<'a, char>,
-    ) -> Result<Option<RMC>, &'static str> {
+    ) -> Result<Option<Self>, &'static str> {
         let time = Time::parse_from_hhmmss(fields.next().and_then(empty_str_as_none))?;
         let status = if let Some(f_status) = fields.next() {
             Status::from_str(f_status)?

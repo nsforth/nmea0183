@@ -6,6 +6,7 @@ pub mod coords;
 pub mod datetime;
 pub mod modes;
 pub mod rmc;
+pub mod gga;
 
 #[derive(Debug, PartialEq)]
 pub enum Source {
@@ -32,6 +33,7 @@ impl TryFrom<&str> for Source {
 #[derive(Debug, PartialEq)]
 pub enum ParseResult {
     RMC(Option<rmc::RMC>),
+    GGA(Option<gga::GGA>),
 }
 
 pub struct Parser {
@@ -159,6 +161,7 @@ impl Parser {
         let source = Source::try_from(sentence_field)?;
         match &sentence_field[2..5] {
             "RMC" => Ok(ParseResult::RMC(rmc::RMC::parse_rmc(source, &mut iter)?)),
+            "GGA" => Ok(ParseResult::GGA(gga::GGA::parse(source, &mut iter)?)),
             _ => Err("Unsupported sentence type"),
         }
     }
@@ -180,176 +183,4 @@ fn parse_hex_halfbyte(symbol: u8) -> Result<u8, &'static str> {
         return Ok(symbol - b'A' + 10);
     }
     Err("Invalid HEX character.")
-}
-
-#[test]
-fn test_correct_but_unsupported_nmea_block() {
-    let mut p = Parser::new();
-    let sentence = b"$GPVTG,089.0,T,,,15.2,N,,*7F\r\n";
-    let mut parsed = false;
-    for b in sentence.iter() {
-        let r = p.parse_from_byte(*b);
-        if r.is_some() {
-            assert_eq!(r.unwrap(), Err("Unsupported sentence type"));
-            parsed = true;
-            break;
-        }
-    }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
-}
-
-#[test]
-fn test_correct_rmc() {
-    let mut p = Parser::new();
-    let sentence = b"$GPRMC,125504.049,A,5542.2389,N,03741.6063,E,0.06,25.82,200906,,,A*56\r\n";
-    let mut parsed = false;
-    for b in sentence.iter() {
-        let r = p.parse_from_byte(*b);
-        if r.is_some() {
-            assert_eq!(
-                r.unwrap(),
-                Ok(ParseResult::RMC(Some(rmc::RMC {
-                    source: Source::GPS,
-                    datetime: datetime::DateTime {
-                        date: datetime::Date {
-                            day: 20,
-                            month: 9,
-                            year: 2006
-                        },
-                        time: datetime::Time {
-                            hours: 12,
-                            minutes: 55,
-                            seconds: 4.049
-                        }
-                    },
-                    latitude: TryFrom::try_from(55.703981666666664).unwrap(),
-                    longitude: TryFrom::try_from(37.69343833333333).unwrap(),
-                    speed: coords::Speed::from_knots(0.06),
-                    course: From::from(25.82),
-                    magnetic: None,
-                    mode: modes::Mode::Autonomous
-                })))
-            );
-            parsed = true;
-            break;
-        }
-    }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
-}
-
-#[test]
-fn test_correct_rmc2() {
-    let mut p = Parser::new();
-    let sentence = b"$GPRMC,113650.0,A,5548.607,N,03739.387,E,000.01,255.6,210403,08.7,E*69\r\n";
-    let mut parsed = false;
-    for b in sentence.iter() {
-        let r = p.parse_from_byte(*b);
-        if r.is_some() {
-            assert_eq!(
-                r.unwrap(),
-                Ok(ParseResult::RMC(Some(rmc::RMC {
-                    source: Source::GPS,
-                    datetime: datetime::DateTime {
-                        date: datetime::Date {
-                            day: 21,
-                            month: 4,
-                            year: 2003
-                        },
-                        time: datetime::Time {
-                            hours: 11,
-                            minutes: 36,
-                            seconds: 50.0
-                        }
-                    },
-                    latitude: TryFrom::try_from(55.810116666666666).unwrap(),
-                    longitude: TryFrom::try_from(37.65645).unwrap(),
-                    speed: coords::Speed::from_knots(0.01),
-                    course: From::from(255.6),
-                    magnetic: Some(From::from(246.90001)),
-                    mode: modes::Mode::Autonomous
-                })))
-            );
-            parsed = true;
-            break;
-        }
-    }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
-}
-
-#[test]
-fn test_parser_iterator() {
-    let mut p = Parser::new();
-    let b = b"$GPRMC,125504.049,A,5542.2389,N,03741.6063,E,0.06,25.82,200906,,,A*56\r\n";
-    {
-        let mut iter = p.parse_from_bytes(&b[..]);
-        assert_eq!(
-            iter.next().unwrap(),
-            Ok(ParseResult::RMC(Some(rmc::RMC {
-                source: Source::GPS,
-                datetime: datetime::DateTime {
-                    date: datetime::Date {
-                        day: 20,
-                        month: 9,
-                        year: 2006
-                    },
-                    time: datetime::Time {
-                        hours: 12,
-                        minutes: 55,
-                        seconds: 4.049
-                    }
-                },
-                latitude: TryFrom::try_from(55.703981666666664).unwrap(),
-                longitude: TryFrom::try_from(37.69343833333333).unwrap(),
-                speed: coords::Speed::from_knots(0.06),
-                course: From::from(25.82),
-                magnetic: None,
-                mode: modes::Mode::Autonomous
-            })))
-        );
-    }
-    let b1 = b"$GPRMC,125504.049,A,5542.2389,N";
-    {
-        let mut iter = p.parse_from_bytes(&b1[..]);
-        assert!(iter.next().is_none());
-    }
-    let b2 = b",03741.6063,E,0.06,25.82,200906,,,";
-    {
-        let mut iter = p.parse_from_bytes(&b2[..]);
-        assert!(iter.next().is_none());
-    }
-    let b3 = b"A*56\r\n";
-    {
-        let mut iter = p.parse_from_bytes(&b3[..]);
-        assert_eq!(
-            iter.next().unwrap(),
-            Ok(ParseResult::RMC(Some(rmc::RMC {
-                source: Source::GPS,
-                datetime: datetime::DateTime {
-                    date: datetime::Date {
-                        day: 20,
-                        month: 9,
-                        year: 2006
-                    },
-                    time: datetime::Time {
-                        hours: 12,
-                        minutes: 55,
-                        seconds: 4.049
-                    }
-                },
-                latitude: TryFrom::try_from(55.703981666666664).unwrap(),
-                longitude: TryFrom::try_from(37.69343833333333).unwrap(),
-                speed: coords::Speed::from_knots(0.06),
-                course: From::from(25.82),
-                magnetic: None,
-                mode: modes::Mode::Autonomous
-            })))
-        );
-        assert!(iter.next().is_none());
-    }
 }

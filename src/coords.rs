@@ -204,7 +204,21 @@ impl Longitude {
 
 #[derive(Debug, PartialEq)]
 pub struct Altitude {
-    meters: f32,
+    pub meters: f32,
+}
+
+impl Altitude {
+    pub(crate) fn parse(input: Option<&str>) -> Result<Option<Self>, &'static str> {
+        match input {
+            Some("") => Ok(None),
+            Some(alt) => Ok(Some(Altitude {
+                meters: alt
+                    .parse::<f32>()
+                    .map_err(|_| "Wrong altitude field format")?,
+            })),
+            _ => Ok(None),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

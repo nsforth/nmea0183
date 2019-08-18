@@ -4,18 +4,30 @@ use crate::datetime::Time;
 use crate::Source;
 use core::time::Duration;
 
+/// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
 #[derive(Debug, PartialEq)]
 pub struct GGA {
+    /// Navigational system.
     pub source: Source,
+    /// Time of fix in UTC.
     pub time: Time,
+    /// Latitude in reference datum, typically WGS-84.
     pub latitude: Latitude,
+    /// Logitude in reference datum, typically WGS-84.
     pub longitude: Longitude,
+    /// Quality of GPS solution.
     pub gps_quality: GPSQuality,
+    /// Sattelites in use
     pub sat_in_use: u8,
+    /// Horizontal dilusion of presicion. Indicates precision of solution.
     pub hdop: f32,
+    /// Altitude over ground, typically WGS-84.
     pub altitude: Altitude,
+    /// The difference between reference ellipsoid surface and mean-sea-level.
     pub geoidal_separation: Option<f32>,
+    /// DGPS data age. None if DGPS not in use.
     pub age_dgps: Option<Duration>,
+    /// ID of reference DGPS station used for fix. None if DGPS not in use.
     pub dgps_station_id: Option<u16>,
 }
 

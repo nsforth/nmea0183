@@ -1,10 +1,28 @@
 use core::convert::TryFrom;
-use nmea_0183::datetime;
 use nmea_0183::coords;
+use nmea_0183::datetime;
+use nmea_0183::gga;
 use nmea_0183::modes;
 use nmea_0183::rmc;
-use nmea_0183::gga;
-use nmea_0183::{Source, Parser, ParseResult};
+use nmea_0183::{ParseResult, Parser, Source};
+
+#[test]
+fn test_correct_but_unsupported_source() {
+    let mut p = Parser::new();
+    let sentence = b"$LCVTG,089.0,T,,,15.2,N,,*67\r\n";
+    let mut parsed = false;
+    for b in sentence.iter() {
+        let r = p.parse_from_byte(*b);
+        if r.is_some() {
+            assert_eq!(r.unwrap(), Err("Source is not supported"));
+            parsed = true;
+            break;
+        }
+    }
+    if !parsed {
+        panic!("Parser failed to parse correct block!");
+    }
+}
 
 #[test]
 fn test_correct_but_unsupported_nmea_block() {
@@ -87,7 +105,7 @@ fn test_correct_gga() {
                     gps_quality: gga::GPSQuality::DGPS,
                     sat_in_use: 7,
                     hdop: 0.6,
-                    altitude: coords::Altitude { meters: 9.0},
+                    altitude: coords::Altitude { meters: 9.0 },
                     geoidal_separation: Some(18.0),
                     age_dgps: None,
                     dgps_station_id: None

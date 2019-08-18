@@ -9,12 +9,18 @@ pub mod gga;
 pub mod modes;
 pub mod rmc;
 
+/// Source of NMEA sentence. May be navigation system or navigation sensor.
 #[derive(Debug, PartialEq)]
 pub enum Source {
+    /// USA Global Positioning System
     GPS,
+    /// Russian Federation GLONASS
     GLONASS,
+    /// European Union Gallileo
     Gallileo,
+    /// China's Beidou
     Beidou,
+    /// Global Navigation Sattelite System. Some combination of other systems. Depends on receiver model, receiver settings, etc..
     GNSS,
 }
 
@@ -33,9 +39,14 @@ impl TryFrom<&str> for Source {
     }
 }
 
+/// Success NMEA sentence parsing result.
+/// Null fields sentences or sentences without valid data is also parsed and returned as None.
+/// None ParseResult may be interpreted as working receiver but without valid data.
 #[derive(Debug, PartialEq)]
 pub enum ParseResult {
+    /// Typically most used Recommended Minimum Sentence for any GNSS.
     RMC(Option<rmc::RMC>),
+    /// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
     GGA(Option<gga::GGA>),
 }
 

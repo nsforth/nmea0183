@@ -3,15 +3,26 @@ use crate::datetime::{Date, DateTime, Time};
 use crate::modes::{Mode, Status};
 use crate::Source;
 
+/// Typically most used Recommended Minimum Sentence for any GNSS.
+/// Course may be None, some receivers do not reports course when detects no movement.
+/// MagneticCourse may be None, many receivers do not reports magnetic variation.
 #[derive(Debug, PartialEq)]
 pub struct RMC {
+    /// Navigational system.
     pub source: Source,
+    /// Date and time of fix in UTC.
     pub datetime: DateTime,
+    /// Latitude in reference datum, mostly WGS-84.
     pub latitude: Latitude,
+    /// Logitude in reference datum, mostly WGS-84.
     pub longitude: Longitude,
+    /// Speed over ground.
     pub speed: Speed,
+    /// Course over ground.
     pub course: Course,
+    /// Magnetic course over ground (angle to magnetic North pole).
     pub magnetic: Option<MagneticCourse>,
+    /// Receiver's mode of operation.
     pub mode: Mode,
 }
 

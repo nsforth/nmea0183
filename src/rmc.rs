@@ -16,7 +16,7 @@ pub struct RMC {
 }
 
 impl RMC {
-    pub(crate) fn parse_rmc<'a>(
+    pub(crate) fn parse<'a>(
         source: Source,
         fields: &mut core::str::Split<'a, char>,
     ) -> Result<Option<Self>, &'static str> {

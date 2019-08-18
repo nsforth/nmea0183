@@ -5,16 +5,16 @@ use core::slice::Iter;
 pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
+pub mod gga;
 pub mod modes;
 pub mod rmc;
-pub mod gga;
-
 
 #[derive(Debug, PartialEq)]
 pub enum Source {
     GPS,
     GLONASS,
-    GALLILEO,
+    Gallileo,
+    Beidou,
     GNSS,
 }
 
@@ -25,7 +25,8 @@ impl TryFrom<&str> for Source {
         match &from[0..2] {
             "GP" => Ok(Source::GPS),
             "GL" => Ok(Source::GLONASS),
-            "GA" => Ok(Source::GALLILEO),
+            "GA" => Ok(Source::Gallileo),
+            "BD" => Ok(Source::Beidou),
             "GN" => Ok(Source::GNSS),
             _ => Err("Source is not supported"),
         }
@@ -162,7 +163,7 @@ impl Parser {
         }
         let source = Source::try_from(sentence_field)?;
         match &sentence_field[2..5] {
-            "RMC" => Ok(ParseResult::RMC(rmc::RMC::parse_rmc(source, &mut iter)?)),
+            "RMC" => Ok(ParseResult::RMC(rmc::RMC::parse(source, &mut iter)?)),
             "GGA" => Ok(ParseResult::GGA(gga::GGA::parse(source, &mut iter)?)),
             _ => Err("Unsupported sentence type"),
         }

@@ -55,7 +55,7 @@ impl TryFrom<f64> for Latitude {
 impl Latitude {
     pub fn parse(coord: Option<&str>, hemi: Option<&str>) -> Result<Option<Self>, &'static str> {
         match (coord, hemi) {
-            (Some(lat), Some(lat_hemi)) if lat.len() == 0 && lat_hemi.len() == 0 =>  Ok(None),
+            (Some(lat), Some(lat_hemi)) if lat.len() == 0 && lat_hemi.len() == 0 => Ok(None),
             (Some(lat), Some(lat_hemi)) => {
                 if lat.len() < 4 {
                     return Err("Latitude field is too short!");
@@ -153,7 +153,7 @@ impl TryFrom<f64> for Longitude {
 impl Longitude {
     pub fn parse(coord: Option<&str>, hemi: Option<&str>) -> Result<Option<Self>, &'static str> {
         match (coord, hemi) {
-            (Some(lon), Some(lon_hemi)) if lon.len() == 0 && lon_hemi.len() == 0 =>  Ok(None),
+            (Some(lon), Some(lon_hemi)) if lon.len() == 0 && lon_hemi.len() == 0 => Ok(None),
             (Some(lon), Some(lon_hemi)) => {
                 if lon.len() < 5 {
                     return Err("Longitude field is too short!");
@@ -304,7 +304,17 @@ impl From<f32> for MagneticCourse {
 }
 
 impl MagneticCourse {
-    pub(crate) fn parse(
+    pub(crate) fn parse_from_str(input: Option<&str>) -> Result<Option<Self>, &'static str> {
+        match input {
+            Some(course) if course.len() == 0 => Ok(None),
+            Some(course) => course
+                .parse::<f32>()
+                .map_err(|_| "Wrong course field format")
+                .and_then(|degrees| Ok(Some(MagneticCourse { degrees }))),
+            _ => Ok(None),
+        }
+    }
+    pub(crate) fn parse_from_mvar_mdir(
         true_course: &Option<Course>,
         mvar: Option<&str>,
         mdir: Option<&str>,

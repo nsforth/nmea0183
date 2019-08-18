@@ -38,6 +38,19 @@ impl Mode {
 }
 
 impl Mode {
+    pub(crate) fn from_some_str(from: Option<&str>) -> Result<Self, &'static str> {
+        match from {
+            Some("A") => Ok(Mode::Autonomous),
+            Some("D") => Ok(Mode::Differential),
+            Some("E") => Ok(Mode::Estimated),
+            Some("M") => Ok(Mode::Manual),
+            Some("S") => Ok(Mode::Simulator),
+            Some("N") => Ok(Mode::NotValid),
+            None => Err("Mode field shoud not be null!"),
+            Some("") => Err("Mode should not be empty string!"),
+            _ => Err("Wrong mode character!"),
+        }
+    }
     pub(crate) fn from_some_str_or_status(
         from: Option<&str>,
         alternate: &Status,

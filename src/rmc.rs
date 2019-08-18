@@ -42,7 +42,7 @@ impl RMC {
         let speed = Speed::parse(fields.next())?;
         let course = Course::parse(fields.next())?;
         let date = Date::parse_from_ddmmyy(fields.next())?;
-        let magnetic = MagneticCourse::parse(&course, fields.next(), fields.next())?;
+        let magnetic = MagneticCourse::parse_from_mvar_mdir(&course, fields.next(), fields.next())?;
         let mode = Mode::from_some_str_or_status(fields.next(), &status)?;
 
         let datetime = DateTime::from_date_and_time(date, time)?;

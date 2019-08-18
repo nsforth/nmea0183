@@ -9,6 +9,7 @@ pub mod gga;
 pub mod gll;
 pub mod modes;
 pub mod rmc;
+pub mod vtg;
 
 /// Source of NMEA sentence. May be navigation system or navigation sensor.
 #[derive(Debug, PartialEq)]
@@ -40,17 +41,19 @@ impl TryFrom<&str> for Source {
     }
 }
 
-/// Success NMEA sentence parsing result.
+/// The NMEA sentence parsing result.
 /// Sentences with many null fields or sentences without valid data is also parsed and returned as None.
 /// None ParseResult may be interpreted as working receiver but without valid data.
 #[derive(Debug, PartialEq)]
 pub enum ParseResult {
-    /// Recommended Minimum Sentence for any GNSS. Typically most used.
+    /// The Recommended Minimum Sentence for any GNSS. Typically most used.
     RMC(Option<rmc::RMC>),
-    /// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
+    /// The Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
     GGA(Option<gga::GGA>),
-    /// Geographic latitude ang longitude sentence with time of fix and receiver state.
+    /// The Geographic latitude ang longitude sentence with time of fix and the receiver state.
     GLL(Option<gll::GLL>),
+    /// The actual course and speed relative to the ground.
+    VTG(Option<vtg::VTG>),
 }
 
 pub struct Parser {
@@ -180,6 +183,7 @@ impl Parser {
             "RMC" => Ok(ParseResult::RMC(rmc::RMC::parse(source, &mut iter)?)),
             "GGA" => Ok(ParseResult::GGA(gga::GGA::parse(source, &mut iter)?)),
             "GLL" => Ok(ParseResult::GLL(gll::GLL::parse(source, &mut iter)?)),
+            "VTG" => Ok(ParseResult::VTG(vtg::VTG::parse(source, &mut iter)?)),
             _ => Err("Unsupported sentence type"),
         }
     }

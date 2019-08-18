@@ -4,6 +4,8 @@ use nmea_0183::datetime;
 use nmea_0183::gga;
 use nmea_0183::modes;
 use nmea_0183::rmc;
+use nmea_0183::gll;
+use nmea_0183::vtg;
 use nmea_0183::{ParseResult, Parser, Source};
 
 #[test]
@@ -27,12 +29,36 @@ fn test_correct_but_unsupported_source() {
 #[test]
 fn test_correct_but_unsupported_nmea_block() {
     let mut p = Parser::new();
-    let sentence = b"$GPVTG,089.0,T,,,15.2,N,,*7F\r\n";
+    let sentence = b"$GPZZZ,,,,,,,,,*61\r\n";
     let mut parsed = false;
     for b in sentence.iter() {
         let r = p.parse_from_byte(*b);
         if r.is_some() {
             assert_eq!(r.unwrap(), Err("Unsupported sentence type"));
+            parsed = true;
+            break;
+        }
+    }
+    if !parsed {
+        panic!("Parser failed to parse correct block!");
+    }
+}
+
+#[test]
+fn test_correct_vtg() {
+    let mut p = Parser::new();
+    let sentence = b"$GPVTG,089.0,T,,,15.2,N,,,A*12\r\n";
+    let mut parsed = false;
+    for b in sentence.iter() {
+        let r = p.parse_from_byte(*b);
+        if r.is_some() {
+            assert_eq!(r.unwrap(), Ok(ParseResult::VTG(Some(vtg::VTG {
+                source: Source::GPS,
+                course: From::from(89.0),
+                magnetic: None,
+                speed: coords::Speed::from_knots(15.2),
+                mode: modes::Mode::Autonomous
+            }))));
             parsed = true;
             break;
         }

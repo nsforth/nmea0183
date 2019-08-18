@@ -7,8 +7,8 @@ use crate::Source;
 pub struct VTG {
     /// Navigational system.
     pub source: Source,
-    /// Course over ground.
-    pub course: Course,
+    /// Course over ground. Some receivers do not reports it when no movement.
+    pub course: Option<Course>,
     /// Magnetic course over ground (angle to magnetic North pole).
     pub magnetic: Option<MagneticCourse>,
     /// Speed over ground.
@@ -32,7 +32,7 @@ impl VTG {
         fields.next(); // Not needed speed kph marker field
         let mode = Mode::from_some_str(fields.next())?;
 
-        if let (Some(speed), Some(course)) = (speed, course) {
+        if let Some(speed) = speed {
             Ok(Some(VTG {
                 source,
                 course,

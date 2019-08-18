@@ -18,8 +18,8 @@ pub struct RMC {
     pub longitude: Longitude,
     /// Speed over ground.
     pub speed: Speed,
-    /// Course over ground.
-    pub course: Course,
+    /// Course over ground. Some receivers do not report it when no movement.
+    pub course: Option<Course>,
     /// Magnetic course over ground (angle to magnetic North pole).
     pub magnetic: Option<MagneticCourse>,
     /// Receiver's mode of operation.
@@ -46,16 +46,16 @@ impl RMC {
         let mode = Mode::from_some_str_or_status(fields.next(), &status)?;
 
         let datetime = DateTime::from_date_and_time(date, time)?;
-        if let (Some(dt), Some(lat), Some(lon), Some(spd), Some(crs)) =
-            (datetime, latitude, longitude, speed, course)
+        if let (Some(datetime), Some(latitude), Some(longitude), Some(speed)) =
+            (datetime, latitude, longitude, speed)
         {
             Ok(Some(RMC {
                 source,
-                datetime: dt,
-                latitude: lat,
-                longitude: lon,
-                speed: spd,
-                course: crs,
+                datetime,
+                latitude,
+                longitude,
+                speed,
+                course,
                 magnetic: magnetic,
                 mode,
             }))

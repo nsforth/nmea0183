@@ -1,3 +1,4 @@
+use crate::common;
 use crate::coords::{Altitude, Latitude, Longitude};
 use crate::datetime::Time;
 use crate::Source;
@@ -27,75 +28,15 @@ impl GGA {
         let latitude = Latitude::parse(fields.next(), fields.next())?;
         let longitude = Longitude::parse(fields.next(), fields.next())?;
         let gps_quality = GPSQuality::parse(fields.next())?;
-        let sat_in_use = if let Some(f_sat_in_use) = fields.next() {
-            if f_sat_in_use.len() == 0 {
-                None
-            } else {
-                Some(
-                    f_sat_in_use
-                        .parse::<u8>()
-                        .map_err(|_| "Wrong sattelites in use field format")?,
-                )
-            }
-        } else {
-            None
-        };
-        let hdop = if let Some(f_hdop) = fields.next() {
-            if f_hdop.len() == 0 {
-                None
-            } else {
-                Some(
-                    f_hdop
-                        .parse::<f32>()
-                        .map_err(|_| "Wrong horizontal DOP field format")?,
-                )
-            }
-        } else {
-            None
-        };
+        let sat_in_use = common::parse_u8(fields.next())?;
+        let hdop = common::parse_f32(fields.next())?;
         let altitude = Altitude::parse(fields.next())?;
         fields.next(); // Skip altitude type (always meters according to NMEA spec)
-        let geoidal_separation = if let Some(f_geoidal_separation) = fields.next() {
-            if f_geoidal_separation.len() == 0 {
-                None
-            } else {
-                Some(
-                    f_geoidal_separation
-                        .parse::<f32>()
-                        .map_err(|_| "Wrong geoidal separation field format")?,
-                )
-            }
-        } else {
-            None
-        };
+        let geoidal_separation = common::parse_f32(fields.next())?;
         fields.next(); // Skip geoidal separation type (always meters according to NMEA spec)
-        let age_dgps = if let Some(f_age_dgps) = fields.next() {
-            if f_age_dgps.len() == 0 {
-                None
-            } else {
-                Some(
-                    f_age_dgps
-                        .parse::<f32>()
-                        .map_err(|_| "Wrong age dgps field format")
-                        .and_then(|a| Ok(Duration::from_millis((a * 1000f32) as u64)))?,
-                )
-            }
-        } else {
-            None
-        };
-        let dgps_station_id = if let Some(f_dgps_station_id) = fields.next() {
-            if f_dgps_station_id.len() == 0 {
-                None
-            } else {
-                Some(
-                    f_dgps_station_id
-                        .parse::<u16>()
-                        .map_err(|_| "Wrong diff station id field format")?,
-                )
-            }
-        } else {
-            None
-        };
+        let age_dgps = common::parse_f32(fields.next())?
+            .and_then(|a| Some(Duration::from_millis((a * 1000f32) as u64)));
+        let dgps_station_id = common::parse_u16(fields.next())?;
         if let (
             Some(time),
             Some(latitude),

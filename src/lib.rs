@@ -2,11 +2,13 @@
 use core::convert::TryFrom;
 use core::slice::Iter;
 
+pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
 pub mod modes;
 pub mod rmc;
 pub mod gga;
+
 
 #[derive(Debug, PartialEq)]
 pub enum Source {

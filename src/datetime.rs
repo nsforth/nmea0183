@@ -8,6 +8,7 @@ pub struct Date {
 impl Date {
     pub(crate) fn parse_from_ddmmyy(input: Option<&str>) -> Result<Option<Date>, &'static str> {
         match input {
+            Some(date) if date.len() == 0 => Ok(None),
             Some(date) if date.len() < 6 => Err("Date input string is too short!"),
             Some(date) => Ok(Some(Date {
                 day: (&date[..2])
@@ -28,8 +29,7 @@ impl Date {
                     .map(|year| if year > 69 { year + 1900 } else { year + 2000 })
                     .map_err(|_| "Year string is not a number!")?,
             })),
-            _ => Ok(None)
-
+            _ => Ok(None),
         }
     }
 }
@@ -44,6 +44,7 @@ pub struct Time {
 impl Time {
     pub(crate) fn parse_from_hhmmss(input: Option<&str>) -> Result<Option<Time>, &'static str> {
         match input {
+            Some(time) if time.len() == 0 => Ok(None),
             Some(time) if time.len() < 6 => Err("Date input string is too short!"),
             Some(time) => Ok(Some(Time {
                 hours: (&time[..2])
@@ -77,7 +78,7 @@ impl Time {
                         }
                     })?,
             })),
-            _ => Ok(None)
+            _ => Ok(None),
         }
     }
 }
@@ -94,10 +95,10 @@ impl DateTime {
         maybe_time: Option<Time>,
     ) -> Result<Option<Self>, &'static str> {
         match (maybe_date, maybe_time) {
-            (Some(date), Some(time)) => Ok(Some(DateTime { date, time})),
+            (Some(date), Some(time)) => Ok(Some(DateTime { date, time })),
             (None, None) => Ok(None),
-            _ => Err("Date or time is None, should be Some both")
-        }        
+            _ => Err("Date or time is None, should be Some both"),
+        }
     }
 }
 
@@ -115,7 +116,9 @@ fn test_parse_date() {
 
 #[test]
 fn test_parse_time() {
-    let time = Time::parse_from_hhmmss(Some("124201.340")).unwrap().unwrap();
+    let time = Time::parse_from_hhmmss(Some("124201.340"))
+        .unwrap()
+        .unwrap();
     assert_eq!(time.hours, 12);
     assert_eq!(time.minutes, 42);
     assert_eq!(time.seconds, 1.34);

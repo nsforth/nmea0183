@@ -55,6 +55,7 @@ impl TryFrom<f64> for Latitude {
 impl Latitude {
     pub fn parse(coord: Option<&str>, hemi: Option<&str>) -> Result<Option<Self>, &'static str> {
         match (coord, hemi) {
+            (Some(lat), Some(lat_hemi)) if lat.len() == 0 && lat_hemi.len() == 0 =>  Ok(None),
             (Some(lat), Some(lat_hemi)) => {
                 if lat.len() < 4 {
                     return Err("Latitude field is too short!");
@@ -152,6 +153,7 @@ impl TryFrom<f64> for Longitude {
 impl Longitude {
     pub fn parse(coord: Option<&str>, hemi: Option<&str>) -> Result<Option<Self>, &'static str> {
         match (coord, hemi) {
+            (Some(lon), Some(lon_hemi)) if lon.len() == 0 && lon_hemi.len() == 0 =>  Ok(None),
             (Some(lon), Some(lon_hemi)) => {
                 if lon.len() < 5 {
                     return Err("Longitude field is too short!");
@@ -255,13 +257,13 @@ impl Speed {
         self.knots * 0.514444
     }
     pub(crate) fn parse(input: Option<&str>) -> Result<Option<Self>, &'static str> {
-        if let Some(speed) = input {
-            let knots = speed
+        match input {
+            Some(speed) if speed.len() == 0 => Ok(None),
+            Some(speed) => speed
                 .parse::<f32>()
-                .map_err(|_| "Wrong speed field format")?;
-            Ok(Some(Speed { knots }))
-        } else {
-            Ok(None)
+                .map_err(|_| "Wrong speed field format")
+                .and_then(|knots| Ok(Some(Speed { knots }))),
+            _ => Ok(None),
         }
     }
 }
@@ -279,13 +281,13 @@ impl From<f32> for Course {
 
 impl Course {
     pub(crate) fn parse(input: Option<&str>) -> Result<Option<Self>, &'static str> {
-        if let Some(course) = input {
-            let degrees = course
+        match input {
+            Some(course) if course.len() == 0 => Ok(None),
+            Some(course) => course
                 .parse::<f32>()
-                .map_err(|_| "Wrong course field format!")?;
-            Ok(Some(Course { degrees }))
-        } else {
-            Ok(None)
+                .map_err(|_| "Wrong course field format")
+                .and_then(|degrees| Ok(Some(Course { degrees }))),
+            _ => Ok(None),
         }
     }
 }
@@ -308,17 +310,21 @@ impl MagneticCourse {
         mdir: Option<&str>,
     ) -> Result<Option<Self>, &'static str> {
         if let (Some(course), Some(variation), Some(direction)) = (true_course, mvar, mdir) {
-            let magnetic = variation
-                .parse::<f32>()
-                .map_err(|_| "Wrong magnetic variation field format!")?;
-            match direction {
-                "E" => Ok(Some(MagneticCourse {
-                    degrees: course.degrees - magnetic,
-                })),
-                "W" => Ok(Some(MagneticCourse {
-                    degrees: course.degrees + magnetic,
-                })),
-                _ => Err("Wrong direction field for magnetic variation"),
+            if variation.len() == 0 && direction.len() == 0 {
+                Ok(None)
+            } else {
+                let magnetic = variation
+                    .parse::<f32>()
+                    .map_err(|_| "Wrong magnetic variation field format!")?;
+                match direction {
+                    "E" => Ok(Some(MagneticCourse {
+                        degrees: course.degrees - magnetic,
+                    })),
+                    "W" => Ok(Some(MagneticCourse {
+                        degrees: course.degrees + magnetic,
+                    })),
+                    _ => Err("Wrong direction field for magnetic variation"),
+                }
             }
         } else {
             Ok(None)

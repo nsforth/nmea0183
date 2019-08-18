@@ -6,6 +6,7 @@ pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
 pub mod gga;
+pub mod gll;
 pub mod modes;
 pub mod rmc;
 
@@ -40,14 +41,16 @@ impl TryFrom<&str> for Source {
 }
 
 /// Success NMEA sentence parsing result.
-/// Null fields sentences or sentences without valid data is also parsed and returned as None.
+/// Sentences with many null fields or sentences without valid data is also parsed and returned as None.
 /// None ParseResult may be interpreted as working receiver but without valid data.
 #[derive(Debug, PartialEq)]
 pub enum ParseResult {
-    /// Typically most used Recommended Minimum Sentence for any GNSS.
+    /// Recommended Minimum Sentence for any GNSS. Typically most used.
     RMC(Option<rmc::RMC>),
     /// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
     GGA(Option<gga::GGA>),
+    /// Geographic latitude ang longitude sentence with time of fix and receiver state.
+    GLL(Option<gll::GLL>),
 }
 
 pub struct Parser {
@@ -176,6 +179,7 @@ impl Parser {
         match &sentence_field[2..5] {
             "RMC" => Ok(ParseResult::RMC(rmc::RMC::parse(source, &mut iter)?)),
             "GGA" => Ok(ParseResult::GGA(gga::GGA::parse(source, &mut iter)?)),
+            "GLL" => Ok(ParseResult::GLL(gll::GLL::parse(source, &mut iter)?)),
             _ => Err("Unsupported sentence type"),
         }
     }

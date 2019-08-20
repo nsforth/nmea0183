@@ -11,7 +11,7 @@
  # Examples
 
  If you could read a one byte at a time from the receiver you may use `parse_from_byte`:
- ```
+ ```rust
  use nmea0183::{Parser, ParseResult};
 
  let nmea = b"$GPGGA,145659.00,5956.695396,N,03022.454999,E,2,07,0.6,9.0,M,18.0,M,,*62\r\n$GPGGA,,,,,,,,,,,,,,*00\r\n";
@@ -29,7 +29,7 @@
  ```
 
  If you read many bytes from receiver at once or want to parse NMEA log from text file you could use Iterator-style:
- ```
+ ```rust
  use nmea0183::{Parser, ParseResult};
 
  let nmea = b"$GPGGA,,,,,,,,,,,,,,*00\r\n$GPRMC,125504.049,A,5542.2389,N,03741.6063,E,0.06,25.82,200906,,,A*56\r\n";

@@ -1,13 +1,13 @@
 use core::convert::TryFrom;
-use nmea_0183::coords;
-use nmea_0183::datetime;
-use nmea_0183::GPSQuality;
-use nmea_0183::Mode;
-use nmea_0183::GGA;
-use nmea_0183::GLL;
-use nmea_0183::RMC;
-use nmea_0183::VTG;
-use nmea_0183::{ParseResult, Parser, Source};
+use nmea0183::coords;
+use nmea0183::datetime;
+use nmea0183::GPSQuality;
+use nmea0183::Mode;
+use nmea0183::GGA;
+use nmea0183::GLL;
+use nmea0183::RMC;
+use nmea0183::VTG;
+use nmea0183::{ParseResult, Parser, Source};
 
 #[test]
 fn test_correct_but_unsupported_source() {
@@ -17,7 +17,7 @@ fn test_correct_but_unsupported_source() {
     for b in sentence.iter() {
         let r = p.parse_from_byte(*b);
         if r.is_some() {
-            assert_eq!(r.unwrap(), Err("Source is not supported"));
+            assert_eq!(r.unwrap(), Err("Source is not supported!"));
             parsed = true;
             break;
         }
@@ -35,7 +35,7 @@ fn test_correct_but_unsupported_nmea_block() {
     for b in sentence.iter() {
         let r = p.parse_from_byte(*b);
         if r.is_some() {
-            assert_eq!(r.unwrap(), Err("Unsupported sentence type"));
+            assert_eq!(r.unwrap(), Err("Unsupported sentence type."));
             parsed = true;
             break;
         }
@@ -153,7 +153,7 @@ fn test_correct_gga() {
 #[test]
 fn test_correct_rmc2() {
     let mut p = Parser::new();
-    let sentence = b"$GPRMC,113650.0,A,5548.607,N,03739.387,E,000.01,255.6,210403,08.7,E*69\r\n";
+    let sentence = b"$GPRMC,113650.0,A,5548.607,S,03739.387,W,000.01,255.6,210403,08.7,E*66\r\n";
     let mut parsed = false;
     for b in sentence.iter() {
         let r = p.parse_from_byte(*b);
@@ -174,8 +174,8 @@ fn test_correct_rmc2() {
                             seconds: 50.0
                         }
                     },
-                    latitude: TryFrom::try_from(55.810116666666666).unwrap(),
-                    longitude: TryFrom::try_from(37.65645).unwrap(),
+                    latitude: TryFrom::try_from(-55.810116666666666).unwrap(),
+                    longitude: TryFrom::try_from(-37.65645).unwrap(),
                     speed: coords::Speed::from_knots(0.01),
                     course: Some(From::from(255.6)),
                     magnetic: Some(From::from(246.90001)),

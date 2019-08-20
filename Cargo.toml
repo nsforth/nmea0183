@@ -1,9 +1,11 @@
 [package]
-name = "nmea-0183"
+name = "nmea0183"
 version = "0.1.0"
 authors = ["Nikita Staroverov <nsforth@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "NMEA 0183 Parser tartgetting mostly embedded devices but not limited to."
+homepage = "https://github.com/nsforth/nmea0183"
+license = "BSD-3-Clause"
+keywords = ["NMEA", "nmea", "parser", "gps", "embedded"]
 
 [dependencies]

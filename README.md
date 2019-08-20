@@ -1,6 +1,6 @@
-% NMEA 0183 Parser.
+# NMEA 0183 Parser.
 
- NMEA 0183 parser. Implemented most used sentences like RMC, VTG, GGA, GLL.
+ Implemented most used sentences like RMC, VTG, GGA, GLL.
  Parser do not use heap memory and relies only on `core`.
 
  You should instantiate `Parser` with `new` and than use methods like `parse_from_byte` or `parse_from_bytes`.

@@ -38,14 +38,14 @@ impl TryFrom<f32> for Latitude {
 impl TryFrom<f64> for Latitude {
     type Error = &'static str;
 
-    fn try_from(value: f64) -> Result<Self, Self::Error> {
-        if value >= 90f64 || value <= -90f64 {
+    fn try_from(from: f64) -> Result<Self, Self::Error> {
+        if from >= 90f64 || from <= -90f64 {
             Err("Latitude is not in range -90 to 90 degrees!")
         } else {
-            let hemisphere = if value > 0f64 {
-                Hemisphere::North
+            let (value, hemisphere) = if from >= 0f64 {
+                (from, Hemisphere::North)
             } else {
-                Hemisphere::South
+                (-from, Hemisphere::South)
             };
             let degrees = value as u8;
             let min_sec = (value - degrees as f64) * 60f64;
@@ -144,14 +144,14 @@ impl TryFrom<f32> for Longitude {
 impl TryFrom<f64> for Longitude {
     type Error = &'static str;
 
-    fn try_from(value: f64) -> Result<Self, Self::Error> {
-        if value >= 180f64 || value <= -180f64 {
+    fn try_from(from: f64) -> Result<Self, Self::Error> {
+        if from >= 180f64 || from <= -180f64 {
             Err("Latitude is not in range -180 to 180 degrees!")
         } else {
-            let hemisphere = if value > 0f64 {
-                Hemisphere::East
+            let (value, hemisphere) = if from >= 0f64 {
+                (from, Hemisphere::East)
             } else {
-                Hemisphere::West
+                (-from, Hemisphere::West)
             };
             let degrees = value as u8;
             let min_sec = (value - degrees as f64) * 60f64;

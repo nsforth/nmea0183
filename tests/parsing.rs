@@ -1,11 +1,11 @@
 use core::convert::TryFrom;
 use nmea_0183::coords;
 use nmea_0183::datetime;
-use nmea_0183::GGA;
 use nmea_0183::GPSQuality;
 use nmea_0183::Mode;
-use nmea_0183::RMC;
+use nmea_0183::GGA;
 use nmea_0183::GLL;
+use nmea_0183::RMC;
 use nmea_0183::VTG;
 use nmea_0183::{ParseResult, Parser, Source};
 
@@ -53,13 +53,16 @@ fn test_correct_vtg() {
     for b in sentence.iter() {
         let r = p.parse_from_byte(*b);
         if r.is_some() {
-            assert_eq!(r.unwrap(), Ok(ParseResult::VTG(Some(VTG {
-                source: Source::GPS,
-                course: Some(From::from(89.0)),
-                magnetic: None,
-                speed: coords::Speed::from_knots(15.2),
-                mode: Mode::Autonomous
-            }))));
+            assert_eq!(
+                r.unwrap(),
+                Ok(ParseResult::VTG(Some(VTG {
+                    source: Source::GPS,
+                    course: Some(From::from(89.0)),
+                    magnetic: None,
+                    speed: coords::Speed::from_knots(15.2),
+                    mode: Mode::Autonomous
+                })))
+            );
             parsed = true;
             break;
         }
@@ -185,6 +188,29 @@ fn test_correct_rmc2() {
     }
     if !parsed {
         panic!("Parser failed to parse correct block!");
+    }
+}
+
+#[test]
+fn test_correct_gll() {
+    let mut p = Parser::new();
+    let b = b"$GPGLL,4916.45,N,12311.12,W,225444,A*31\r\n";
+    {
+        let mut iter = p.parse_from_bytes(&b[..]);
+        assert_eq!(
+            iter.next().unwrap(),
+            Ok(ParseResult::GLL(Some(GLL {
+                source: Source::GPS,
+                time: datetime::Time {
+                    hours: 22,
+                    minutes: 54,
+                    seconds: 44.0
+                },
+                latitude: TryFrom::try_from(49.2741666667).unwrap(),
+                longitude: TryFrom::try_from(-123.18533333334).unwrap(),
+                mode: Mode::Autonomous
+            })))
+        );
     }
 }
 

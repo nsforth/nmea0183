@@ -1,7 +1,12 @@
+//! NMEA date and time structures.
+/// NMEA date
 #[derive(Debug, PartialEq)]
 pub struct Date {
+    /// NMEA day
     pub day: u8,
+    /// NMEA month
     pub month: u8,
+    /// Absolute year calculated from NMEA two-digit year, so for 19 it should be 2019, for 70 it should be 1970
     pub year: u16,
 }
 
@@ -34,10 +39,14 @@ impl Date {
     }
 }
 
+/// NMEA time in UTC
 #[derive(Debug, PartialEq)]
 pub struct Time {
+    /// Hours as reported by receiver
     pub hours: u8,
+    /// Minutes as reported by receiver
     pub minutes: u8,
+    /// Seconds as reported by receiver. Precision and accuracy depends on receiver.
     pub seconds: f32,
 }
 
@@ -83,9 +92,12 @@ impl Time {
     }
 }
 
+/// NMEA date and time in UTC
 #[derive(Debug, PartialEq)]
 pub struct DateTime {
+    /// NMEA date
     pub date: Date,
+    /// NMEA time
     pub time: Time,
 }
 

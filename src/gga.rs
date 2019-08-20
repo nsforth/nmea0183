@@ -85,16 +85,26 @@ impl GGA {
     }
 }
 
+/// Quality of GPS solution
 #[derive(Debug, PartialEq)]
 pub enum GPSQuality {
+    /// No solution
     NoFix,
+    /// Ordinary GPS solution
     GPS,
+    /// Differential correction used.
     DGPS,
+    /// Locked PPS (pulse per second).
     PPS,
+    /// RTK correction is in use.
     RTK,
+    /// Float RTK correction is in use.
     FRTK,
+    /// Estimated by movement model.
     Estimated,
+    /// Set by operator.
     Manual,
+    /// Simulated.
     Simulated,
 }
 

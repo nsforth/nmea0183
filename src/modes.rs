@@ -1,13 +1,10 @@
 #[derive(Debug, PartialEq)]
-pub enum Status {
+pub(crate) enum Status {
     Valid,
     NotValid,
 }
 
 impl Status {
-    pub fn is_valid(&self) -> bool {
-        *self == Status::Valid
-    }
     pub(crate) fn from_str(st: &str) -> Result<Status, &'static str> {
         match st {
             "A" => Ok(Status::Valid),
@@ -17,17 +14,25 @@ impl Status {
     }
 }
 
+/// Receiver mode of operation.
 #[derive(Debug, PartialEq)]
 pub enum Mode {
+    /// Autonomous mode without any external correction.
     Autonomous,
+    /// Differential correction used.
     Differential,
+    /// Estimated position from previous data and movement model.
     Estimated,
+    /// Set by operator.
     Manual,
+    /// Simulation mode.
     Simulator,
+    /// Completely invalid state. Position data if present could not be used.
     NotValid,
 }
 
 impl Mode {
+    /// Position data shoud be valid if true
     pub fn is_valid(&self) -> bool {
         match self {
             Mode::Autonomous => true,

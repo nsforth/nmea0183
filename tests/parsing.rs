@@ -1,11 +1,12 @@
 use core::convert::TryFrom;
 use nmea_0183::coords;
 use nmea_0183::datetime;
-use nmea_0183::gga;
-use nmea_0183::modes;
-use nmea_0183::rmc;
-use nmea_0183::gll;
-use nmea_0183::vtg;
+use nmea_0183::GGA;
+use nmea_0183::GPSQuality;
+use nmea_0183::Mode;
+use nmea_0183::RMC;
+use nmea_0183::GLL;
+use nmea_0183::VTG;
 use nmea_0183::{ParseResult, Parser, Source};
 
 #[test]
@@ -52,12 +53,12 @@ fn test_correct_vtg() {
     for b in sentence.iter() {
         let r = p.parse_from_byte(*b);
         if r.is_some() {
-            assert_eq!(r.unwrap(), Ok(ParseResult::VTG(Some(vtg::VTG {
+            assert_eq!(r.unwrap(), Ok(ParseResult::VTG(Some(VTG {
                 source: Source::GPS,
                 course: Some(From::from(89.0)),
                 magnetic: None,
                 speed: coords::Speed::from_knots(15.2),
-                mode: modes::Mode::Autonomous
+                mode: Mode::Autonomous
             }))));
             parsed = true;
             break;
@@ -78,7 +79,7 @@ fn test_correct_rmc() {
         if r.is_some() {
             assert_eq!(
                 r.unwrap(),
-                Ok(ParseResult::RMC(Some(rmc::RMC {
+                Ok(ParseResult::RMC(Some(RMC {
                     source: Source::GPS,
                     datetime: datetime::DateTime {
                         date: datetime::Date {
@@ -97,7 +98,7 @@ fn test_correct_rmc() {
                     speed: coords::Speed::from_knots(0.06),
                     course: Some(From::from(25.82)),
                     magnetic: None,
-                    mode: modes::Mode::Autonomous
+                    mode: Mode::Autonomous
                 })))
             );
             parsed = true;
@@ -119,7 +120,7 @@ fn test_correct_gga() {
         if r.is_some() {
             assert_eq!(
                 r.unwrap(),
-                Ok(ParseResult::GGA(Some(gga::GGA {
+                Ok(ParseResult::GGA(Some(GGA {
                     source: Source::GPS,
                     time: datetime::Time {
                         hours: 14,
@@ -128,7 +129,7 @@ fn test_correct_gga() {
                     },
                     latitude: TryFrom::try_from(59.944923266667).unwrap(),
                     longitude: TryFrom::try_from(30.3742499833).unwrap(),
-                    gps_quality: gga::GPSQuality::DGPS,
+                    gps_quality: GPSQuality::DGPS,
                     sat_in_use: 7,
                     hdop: 0.6,
                     altitude: coords::Altitude { meters: 9.0 },
@@ -156,7 +157,7 @@ fn test_correct_rmc2() {
         if r.is_some() {
             assert_eq!(
                 r.unwrap(),
-                Ok(ParseResult::RMC(Some(rmc::RMC {
+                Ok(ParseResult::RMC(Some(RMC {
                     source: Source::GPS,
                     datetime: datetime::DateTime {
                         date: datetime::Date {
@@ -175,7 +176,7 @@ fn test_correct_rmc2() {
                     speed: coords::Speed::from_knots(0.01),
                     course: Some(From::from(255.6)),
                     magnetic: Some(From::from(246.90001)),
-                    mode: modes::Mode::Autonomous
+                    mode: Mode::Autonomous
                 })))
             );
             parsed = true;
@@ -195,7 +196,7 @@ fn test_parser_iterator() {
         let mut iter = p.parse_from_bytes(&b[..]);
         assert_eq!(
             iter.next().unwrap(),
-            Ok(ParseResult::RMC(Some(rmc::RMC {
+            Ok(ParseResult::RMC(Some(RMC {
                 source: Source::GPS,
                 datetime: datetime::DateTime {
                     date: datetime::Date {
@@ -214,7 +215,7 @@ fn test_parser_iterator() {
                 speed: coords::Speed::from_knots(0.06),
                 course: Some(From::from(25.82)),
                 magnetic: None,
-                mode: modes::Mode::Autonomous
+                mode: Mode::Autonomous
             })))
         );
     }
@@ -233,7 +234,7 @@ fn test_parser_iterator() {
         let mut iter = p.parse_from_bytes(&b3[..]);
         assert_eq!(
             iter.next().unwrap(),
-            Ok(ParseResult::RMC(Some(rmc::RMC {
+            Ok(ParseResult::RMC(Some(RMC {
                 source: Source::GPS,
                 datetime: datetime::DateTime {
                     date: datetime::Date {
@@ -252,7 +253,7 @@ fn test_parser_iterator() {
                 speed: coords::Speed::from_knots(0.06),
                 course: Some(From::from(25.82)),
                 magnetic: None,
-                mode: modes::Mode::Autonomous
+                mode: Mode::Autonomous
             })))
         );
         assert!(iter.next().is_none());

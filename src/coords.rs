@@ -1,18 +1,29 @@
+//! Structures that describes coordinates that may be parsed from NMEA sentences.
 use core::convert::TryFrom;
 
+/// Earth hemisphere
 #[derive(Debug, PartialEq)]
 pub enum Hemisphere {
+    /// North
     North,
+    /// South
     South,
+    /// East
     East,
+    /// West
     West,
 }
 
+/// Latitude as reported by receiver.
 #[derive(Debug, PartialEq)]
 pub struct Latitude {
+    /// Degrees
     pub degrees: u8,
+    /// Minutes
     pub minutes: u8,
+    /// Seconds. Precision depends on receiver.
     pub seconds: f32,
+    /// Earth hemisphere. North or south.
     pub hemisphere: Hemisphere,
 }
 
@@ -53,7 +64,10 @@ impl TryFrom<f64> for Latitude {
 }
 
 impl Latitude {
-    pub fn parse(coord: Option<&str>, hemi: Option<&str>) -> Result<Option<Self>, &'static str> {
+    pub(crate) fn parse(
+        coord: Option<&str>,
+        hemi: Option<&str>,
+    ) -> Result<Option<Self>, &'static str> {
         match (coord, hemi) {
             (Some(lat), Some(lat_hemi)) if lat.len() == 0 && lat_hemi.len() == 0 => Ok(None),
             (Some(lat), Some(lat_hemi)) => {
@@ -85,7 +99,7 @@ impl Latitude {
             (None, None) => Ok(None),
         }
     }
-
+    /// Return latitude in degrees f64 value. Negative for South hemisphere, positive for North.
     pub fn as_f64(&self) -> f64 {
         let result =
             self.degrees as f64 + (self.minutes as f64) / 60f64 + (self.seconds as f64) / 3600f64;
@@ -96,21 +110,26 @@ impl Latitude {
             Hemisphere::West => panic!("Wrong West hemisphere for latitude!"),
         }
     }
-
+    /// Is north hemisphere
     pub fn is_north(&self) -> bool {
         self.hemisphere == Hemisphere::North
     }
-
+    /// Is south hemisphere
     pub fn is_south(&self) -> bool {
         self.hemisphere == Hemisphere::South
     }
 }
 
+/// Longitude as reported by receiver.
 #[derive(Debug, PartialEq)]
 pub struct Longitude {
+    /// Degrees
     pub degrees: u8,
+    /// Minutes
     pub minutes: u8,
+    /// Second. Precision depends on receiver.
     pub seconds: f32,
+    /// Earth hemisphere. East or West.
     pub hemisphere: Hemisphere,
 }
 
@@ -151,7 +170,10 @@ impl TryFrom<f64> for Longitude {
 }
 
 impl Longitude {
-    pub fn parse(coord: Option<&str>, hemi: Option<&str>) -> Result<Option<Self>, &'static str> {
+    pub(crate) fn parse(
+        coord: Option<&str>,
+        hemi: Option<&str>,
+    ) -> Result<Option<Self>, &'static str> {
         match (coord, hemi) {
             (Some(lon), Some(lon_hemi)) if lon.len() == 0 && lon_hemi.len() == 0 => Ok(None),
             (Some(lon), Some(lon_hemi)) => {
@@ -183,7 +205,7 @@ impl Longitude {
             (None, None) => Ok(None),
         }
     }
-
+    /// Return longitude in degrees f64 value. Negative for West hemisphere, positive for East.
     pub fn as_f64(&self) -> f64 {
         let result =
             self.degrees as f64 + (self.minutes as f64) / 60f64 + (self.seconds as f64) / 3600f64;
@@ -194,18 +216,20 @@ impl Longitude {
             Hemisphere::South => panic!("Wrong South hemisphere for latitude!"),
         }
     }
-
+    /// Is in west hemisphere
     pub fn is_west(&self) -> bool {
         self.hemisphere == Hemisphere::West
     }
-
+    /// Is in east hemisphere
     pub fn is_east(&self) -> bool {
         self.hemisphere == Hemisphere::East
     }
 }
 
+/// Altitude reported by receiver typically in GGA sentence.
 #[derive(Debug, PartialEq)]
 pub struct Altitude {
+    /// Altitude in meters over ground.
     pub meters: f32,
 }
 
@@ -223,36 +247,44 @@ impl Altitude {
     }
 }
 
+/// Speed reported by receiver typically in RMC and VTG sentences.
 #[derive(Debug, PartialEq)]
 pub struct Speed {
     knots: f32,
 }
 
 impl Speed {
+    /// Speed from knots
     pub fn from_knots(speed: f32) -> Speed {
         Speed { knots: speed }
     }
+    /// Speed from meters per second
     pub fn from_mps(speed: f32) -> Speed {
         Speed {
             knots: speed * 1.94384f32,
         }
     }
+    /// Speed from miles per hour
     pub fn from_mph(speed: f32) -> Speed {
         Speed {
             knots: speed * 0.868976f32,
         }
     }
+    /// Speed from kilometers per hour
     pub fn from_kph(speed: f32) -> Speed {
         Speed {
             knots: speed * 0.539957f32,
         }
     }
+    /// Speed as kilometers per hour
     pub fn as_kph(&self) -> f32 {
         self.knots * 1.852
     }
+    /// Speed as miles per hour
     pub fn as_mph(&self) -> f32 {
         self.knots * 1.15078
     }
+    /// Speed as meters per second
     pub fn as_mps(&self) -> f32 {
         self.knots * 0.514444
     }
@@ -268,9 +300,11 @@ impl Speed {
     }
 }
 
+/// The course over ground.
 #[derive(Debug, PartialEq)]
 pub struct Course {
-    degrees: f32,
+    /// Course in degrees from North rotated clockwise.
+    pub degrees: f32,
 }
 
 impl From<f32> for Course {
@@ -292,8 +326,10 @@ impl Course {
     }
 }
 
+/// The course over ground calculated from True course and magnetic variation.
 #[derive(Debug, PartialEq)]
 pub struct MagneticCourse {
+    /// Course in degrees from Magnetic North Pole rotated clockwise.
     degrees: f32,
 }
 

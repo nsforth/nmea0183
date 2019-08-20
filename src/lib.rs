@@ -1,17 +1,30 @@
 #![no_std]
+#![warn(missing_docs)]
+//! NMEA 0183 parser. Implemented most used sentences like RMC, VGT, GGA, GLL.
+//! Parser do not use heap memory and relies only on `core`.
+//!
+//! You should instantiate `Parser` with `new` and use methods like `parse_by_byte` or `parse_by_bytes`.
+//! If parser accumulates enough data it will return `ParseResult` or `&str` that describing error.
 use core::convert::TryFrom;
 use core::slice::Iter;
 
 pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
-pub mod gga;
-pub mod gll;
-pub mod modes;
-pub mod rmc;
-pub mod vtg;
+pub(crate) mod gga;
+pub(crate) mod gll;
+pub(crate) mod modes;
+pub(crate) mod rmc;
+pub(crate) mod vtg;
 
-/// Source of NMEA sentence. May be navigation system or navigation sensor.
+pub use gga::GPSQuality;
+pub use gga::GGA;
+pub use gll::GLL;
+pub use modes::Mode;
+pub use rmc::RMC;
+pub use vtg::VTG;
+
+/// Source of NMEA sentence like GPS, GLONASS or other.
 #[derive(Debug, PartialEq)]
 pub enum Source {
     /// USA Global Positioning System
@@ -47,15 +60,17 @@ impl TryFrom<&str> for Source {
 #[derive(Debug, PartialEq)]
 pub enum ParseResult {
     /// The Recommended Minimum Sentence for any GNSS. Typically most used.
-    RMC(Option<rmc::RMC>),
+    RMC(Option<RMC>),
     /// The Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
-    GGA(Option<gga::GGA>),
+    GGA(Option<GGA>),
     /// The Geographic latitude ang longitude sentence with time of fix and the receiver state.
-    GLL(Option<gll::GLL>),
+    GLL(Option<GLL>),
     /// The actual course and speed relative to the ground.
-    VTG(Option<vtg::VTG>),
+    VTG(Option<VTG>),
 }
 
+/// Parses NMEA sentences and stores intermediate parsing state.
+/// Parser is tolerant for errors so you should not reinitialize it after errors.
 pub struct Parser {
     buffer: [u8; 79],
     buflen: usize,
@@ -74,7 +89,7 @@ enum ParserState {
     WaitLF,
 }
 
-pub struct ParserIterator<'a> {
+struct ParserIterator<'a> {
     parser: &'a mut Parser,
     input: Iter<'a, u8>,
 }
@@ -103,6 +118,7 @@ impl Iterator for ParserIterator<'_> {
 }
 
 impl Parser {
+    /// Constructs new Parser.
     pub fn new() -> Parser {
         Parser {
             buffer: [0u8; 79],
@@ -112,7 +128,7 @@ impl Parser {
             parser_state: ParserState::WaitStart,
         }
     }
-
+    /// Use parser state and bytes slice than returns Iterator that yield ['ParseResult'] or errors if has enough data for parsing.
     pub fn parse_from_bytes<'a>(
         &'a mut self,
         input: &'a [u8],
@@ -120,6 +136,7 @@ impl Parser {
         ParserIterator::new(self, input)
     }
 
+    /// Parse NMEA by one byte at a time. Returns Some if has enough data for parsing.
     pub fn parse_from_byte(&mut self, symbol: u8) -> Option<Result<ParseResult, &'static str>> {
         let (new_state, result) = match self.parser_state {
             ParserState::WaitStart if symbol == b'$' => {
@@ -180,10 +197,10 @@ impl Parser {
         }
         let source = Source::try_from(sentence_field)?;
         match &sentence_field[2..5] {
-            "RMC" => Ok(ParseResult::RMC(rmc::RMC::parse(source, &mut iter)?)),
-            "GGA" => Ok(ParseResult::GGA(gga::GGA::parse(source, &mut iter)?)),
-            "GLL" => Ok(ParseResult::GLL(gll::GLL::parse(source, &mut iter)?)),
-            "VTG" => Ok(ParseResult::VTG(vtg::VTG::parse(source, &mut iter)?)),
+            "RMC" => Ok(ParseResult::RMC(RMC::parse(source, &mut iter)?)),
+            "GGA" => Ok(ParseResult::GGA(GGA::parse(source, &mut iter)?)),
+            "GLL" => Ok(ParseResult::GLL(GLL::parse(source, &mut iter)?)),
+            "VTG" => Ok(ParseResult::VTG(VTG::parse(source, &mut iter)?)),
             _ => Err("Unsupported sentence type"),
         }
     }

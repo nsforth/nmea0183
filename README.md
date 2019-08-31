@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/nsforth/nmea0183.svg?branch=master)](https://travis-ci.org/nsforth/nmea0183)
+[![Codecov coverage status](https://codecov.io/gh/nsforth/nmea0183/branch/master/graph/badge.svg)](https://codecov.io/gh/nsforth/nmea0183)
+
 # NMEA 0183 Parser.
 
  Implemented most used sentences like RMC, VTG, GGA, GLL.

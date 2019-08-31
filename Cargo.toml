@@ -8,6 +8,7 @@ homepage = "https://github.com/nsforth/nmea0183"
 license = "BSD-3-Clause"
 keywords = ["NMEA", "nmea", "parser", "gps", "embedded"]
 categories = ["embedded", "no-std", "parser-implementations"]
+readme = "README.md"
 
 [dependencies]
 

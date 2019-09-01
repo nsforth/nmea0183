@@ -76,3 +76,23 @@ impl Mode {
         }
     }
 }
+
+#[test]
+fn test_parse_status() {
+    assert_eq!(Status::from_str("A"), Ok(Status::Valid));
+    assert_eq!(Status::from_str("V"), Ok(Status::NotValid));
+    assert_eq!(Status::from_str(""), Err("Invalid status field!"));
+}
+
+#[test]
+fn test_parse_mode() {
+    assert_eq!(Mode::from_some_str(Some("A")), Ok(Mode::Autonomous));
+    assert_eq!(Mode::from_some_str(Some("D")), Ok(Mode::Differential));
+    assert_eq!(Mode::from_some_str(Some("E")), Ok(Mode::Estimated));
+    assert_eq!(Mode::from_some_str(Some("M")), Ok(Mode::Manual));
+    assert_eq!(Mode::from_some_str(Some("S")), Ok(Mode::Simulator));
+    assert_eq!(Mode::from_some_str(Some("N")), Ok(Mode::NotValid));
+    assert!(Mode::from_some_str(None).is_err());
+    assert!(Mode::from_some_str(Some("")).is_err());
+    assert!(Mode::from_some_str(Some("abc")).is_err());
+}

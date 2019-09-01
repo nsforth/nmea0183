@@ -30,3 +30,46 @@ pub(crate) fn parse_f32(input: Option<&str>) -> Result<Option<f32>, &'static str
         _ => Ok(None),
     }
 }
+
+#[test]
+fn test_parse_u8() {
+    assert_eq!(parse_u8(Some("")), Ok(None));
+    assert_eq!(parse_u8(Some("123")), Ok(Some(123u8)));
+    assert_eq!(
+        parse_u8(Some("a123")),
+        Err("Wrong unsigned int field format")
+    );
+    assert_eq!(
+        parse_u8(Some("-123")),
+        Err("Wrong unsigned int field format")
+    );
+    assert_eq!(
+        parse_u8(Some("256")),
+        Err("Wrong unsigned int field format")
+    );
+}
+
+#[test]
+fn test_parse_u16() {
+    assert_eq!(parse_u16(Some("")), Ok(None));
+    assert_eq!(parse_u16(Some("123")), Ok(Some(123u16)));
+    assert_eq!(
+        parse_u16(Some("a123")),
+        Err("Wrong unsigned int field format")
+    );
+    assert_eq!(
+        parse_u16(Some("-123")),
+        Err("Wrong unsigned int field format")
+    );
+    assert_eq!(
+        parse_u16(Some("70000")),
+        Err("Wrong unsigned int field format")
+    );
+}
+
+#[test]
+fn test_parse_f32() {
+    assert_eq!(parse_f32(Some("")), Ok(None));
+    assert_eq!(parse_f32(Some("123.0")), Ok(Some(123.0f32)));
+    assert_eq!(parse_f32(Some("a123.0")), Err("Wrong float field format"));
+}

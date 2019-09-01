@@ -22,9 +22,7 @@ fn test_correct_but_unsupported_source() {
             break;
         }
     }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
+    assert!(parsed);
 }
 
 #[test]
@@ -40,9 +38,7 @@ fn test_correct_but_unsupported_nmea_block() {
             break;
         }
     }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
+    assert!(parsed);
 }
 
 #[test]
@@ -67,9 +63,7 @@ fn test_correct_vtg() {
             break;
         }
     }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
+    assert!(parsed);
 }
 
 #[test]
@@ -108,9 +102,7 @@ fn test_correct_rmc() {
             break;
         }
     }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
+    assert!(parsed);
 }
 
 #[test]
@@ -145,9 +137,7 @@ fn test_correct_gga() {
             break;
         }
     }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
+    assert!(parsed);
 }
 
 #[test]
@@ -186,9 +176,7 @@ fn test_correct_rmc2() {
             break;
         }
     }
-    if !parsed {
-        panic!("Parser failed to parse correct block!");
-    }
+    assert!(parsed);
 }
 
 #[test]

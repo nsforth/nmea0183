@@ -96,3 +96,37 @@ fn test_parse_mode() {
     assert!(Mode::from_some_str(Some("")).is_err());
     assert!(Mode::from_some_str(Some("abc")).is_err());
 }
+
+#[test]
+fn test_parse_mode_or_status() {
+    assert_eq!(
+        Mode::from_some_str_or_status(Some("A"), &Status::Valid),
+        Ok(Mode::Autonomous)
+    );
+    assert_eq!(
+        Mode::from_some_str_or_status(Some("D"), &Status::Valid),
+        Ok(Mode::Differential)
+    );
+    assert_eq!(
+        Mode::from_some_str_or_status(Some("E"), &Status::NotValid),
+        Ok(Mode::Estimated)
+    );
+    assert_eq!(
+        Mode::from_some_str_or_status(Some("M"), &Status::NotValid),
+        Ok(Mode::Manual)
+    );
+    assert_eq!(
+        Mode::from_some_str_or_status(Some("S"), &Status::NotValid),
+        Ok(Mode::Simulator)
+    );
+    assert_eq!(
+        Mode::from_some_str_or_status(Some("N"), &Status::NotValid),
+        Ok(Mode::NotValid)
+    );
+    assert_eq!(
+        Mode::from_some_str_or_status(None, &Status::NotValid),
+        Ok(Mode::NotValid)
+    );
+    assert!(Mode::from_some_str_or_status(Some(""), &Status::NotValid).is_err());
+    assert!(Mode::from_some_str_or_status(Some("abc"), &Status::NotValid).is_err());
+}

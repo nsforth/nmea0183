@@ -18,7 +18,14 @@ impl Date {
             Some(date) => Ok(Some(Date {
                 day: (&date[..2])
                     .parse()
-                    .map_err(|_| "Day string is not a number!")?,
+                    .map_err(|_| "Day string is not a number!")
+                    .and_then(|d| {
+                        if d > 0 && d < 32 {
+                            Ok(d)
+                        } else {
+                            Err("Day is not in range 1-31")
+                        }
+                    })?,
                 month: (&date[2..4])
                     .parse()
                     .map_err(|_| "Month string is not a number!")
@@ -124,6 +131,8 @@ fn test_parse_date() {
     assert_eq!(date.day, 1);
     assert_eq!(date.month, 2);
     assert_eq!(date.year, 1970);
+    assert!(Date::parse_from_ddmmyy(Some("011470")).is_err());
+    assert!(Date::parse_from_ddmmyy(Some("451070")).is_err());
 }
 
 #[test]
@@ -134,4 +143,6 @@ fn test_parse_time() {
     assert_eq!(time.hours, 12);
     assert_eq!(time.minutes, 42);
     assert_eq!(time.seconds, 1.34);
+    assert!(Time::parse_from_hhmmss(Some("304201.340")).is_err());
+    assert!(Time::parse_from_hhmmss(Some("109001.340")).is_err());
 }

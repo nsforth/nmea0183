@@ -42,6 +42,30 @@ fn test_correct_but_unsupported_nmea_block() {
 }
 
 #[test]
+fn test_stream_slice() {
+    let mut p = Parser::new();
+    let sentence = b"0,T,,,15.2,N,,,A*12\r\n$GPVTG,089.0,T,,,15.2,N,,,A*12\r\n$GPVTG,089.0,T,,,15.2,N,,,A*12\r\n$GPVTG,089.0,T,";
+    let mut parse_count = 0;
+    for b in sentence.iter() {
+        let r = p.parse_from_byte(*b);
+        if r.is_some() {
+            assert_eq!(
+                r.unwrap(),
+                Ok(ParseResult::VTG(Some(VTG {
+                    source: Source::GPS,
+                    course: Some(From::from(89.0)),
+                    magnetic: None,
+                    speed: coords::Speed::from_knots(15.2),
+                    mode: Mode::Autonomous
+                })))
+            );
+            parse_count += 1;
+        }
+    }
+    assert_eq!(parse_count, 2);
+}
+
+#[test]
 fn test_correct_vtg() {
     let mut p = Parser::new();
     let sentence = b"$GPVTG,089.0,T,,,15.2,N,,,A*12\r\n";

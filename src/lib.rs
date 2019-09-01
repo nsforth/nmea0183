@@ -68,8 +68,8 @@
 //!
 //! Filtering by sentence type and/or source. Parser will silently drops unneeded sentences/sources.
 use core::convert::TryFrom;
+use core::ops::BitOr;
 use core::slice::Iter;
-
 pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
@@ -87,18 +87,54 @@ pub use rmc::RMC;
 pub use vtg::VTG;
 
 /// Source of NMEA sentence like GPS, GLONASS or other.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Source {
     /// USA Global Positioning System
-    GPS,
+    GPS = 0b1,
     /// Russian Federation GLONASS
-    GLONASS,
+    GLONASS = 0b10,
     /// European Union Gallileo
-    Gallileo,
+    Gallileo = 0b100,
     /// China's Beidou
-    Beidou,
+    Beidou = 0b1000,
     /// Global Navigation Sattelite System. Some combination of other systems. Depends on receiver model, receiver settings, etc..
-    GNSS,
+    GNSS = 0b10000,
+}
+
+pub struct SourceMask {
+    mask: u32,
+}
+
+impl SourceMask {
+    fn is_masked(&self, source: Source) -> bool {
+        source as u32 & self.mask == 0
+    }
+}
+
+impl Default for SourceMask {
+    fn default() -> Self {
+        SourceMask {
+            mask: u32::max_value(),
+        }
+    }
+}
+
+impl BitOr for Source {
+    type Output = SourceMask;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        SourceMask {
+            mask: self as u32 | rhs as u32,
+        }
+    }
+}
+
+impl BitOr<Source> for SourceMask {
+    type Output = Self;
+    fn bitor(self, rhs: Source) -> Self {
+        SourceMask {
+            mask: self.mask | rhs as u32,
+        }
+    }
 }
 
 impl TryFrom<&str> for Source {
@@ -112,6 +148,51 @@ impl TryFrom<&str> for Source {
             "BD" => Ok(Source::Beidou),
             "GN" => Ok(Source::GNSS),
             _ => Err("Source is not supported!"),
+        }
+    }
+}
+
+/// Various kinds of NMEA sentence like RMC, VTG or other.
+#[derive(Debug, Copy, Clone)]
+pub enum Sentence {
+    RMC = 0b1,
+    VTG = 0b10,
+    GGA = 0b100,
+    GLL = 0b1000,
+}
+
+pub struct SentenceMask {
+    mask: u32,
+}
+
+impl SentenceMask {
+    fn is_masked(&self, sentence: Sentence) -> bool {
+        sentence as u32 & self.mask == 0
+    }
+}
+
+impl Default for SentenceMask {
+    fn default() -> Self {
+        SentenceMask {
+            mask: u32::max_value(),
+        }
+    }
+}
+
+impl BitOr for Sentence {
+    type Output = SentenceMask;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        SentenceMask {
+            mask: self as u32 | rhs as u32,
+        }
+    }
+}
+
+impl BitOr<Sentence> for SentenceMask {
+    type Output = Self;
+    fn bitor(self, rhs: Sentence) -> Self {
+        SentenceMask {
+            mask: self.mask | rhs as u32,
         }
     }
 }
@@ -139,6 +220,8 @@ pub struct Parser {
     chksum: u8,
     expected_chksum: u8,
     parser_state: ParserState,
+    source_mask: SourceMask,
+    sentence_mask: SentenceMask,
 }
 
 #[derive(Debug)]
@@ -188,7 +271,19 @@ impl Parser {
             chksum: 0,
             expected_chksum: 0,
             parser_state: ParserState::WaitStart,
+            source_mask: Default::default(),
+            sentence_mask: Default::default(),
         }
+    }
+    /// Set filter on possible Sources.
+    pub fn with_source_filter(mut self, source_mask: SourceMask) -> Self {
+        self.source_mask = source_mask;
+        self
+    }
+    /// Set filter on possible Sentences.
+    pub fn with_sentence_filter(mut self, sentence_mask: SentenceMask) -> Self {
+        self.sentence_mask = sentence_mask;
+        self
     }
     /// Use parser state and bytes slice than returns Iterator that yield ['ParseResult'] or errors if has enough data for parsing.
     pub fn parse_from_bytes<'a>(
@@ -197,7 +292,6 @@ impl Parser {
     ) -> impl Iterator<Item = Result<ParseResult, &'static str>> + 'a {
         ParserIterator::new(self, input)
     }
-
     /// Parse NMEA by one byte at a time. Returns Some if has enough data for parsing.
     pub fn parse_from_byte(&mut self, symbol: u8) -> Option<Result<ParseResult, &'static str>> {
         let (new_state, result) = match self.parser_state {
@@ -240,7 +334,7 @@ impl Parser {
             },
             ParserState::WaitCR if symbol == b'\r' => (ParserState::WaitLF, None),
             ParserState::WaitLF if symbol == b'\n' => {
-                (ParserState::WaitStart, Some(self.parse_sentences()))
+                (ParserState::WaitStart, self.parse_sentences().transpose())
             }
             _ => (ParserState::WaitStart, Some(Err("NMEA format error!"))),
         };
@@ -248,7 +342,7 @@ impl Parser {
         return result;
     }
 
-    fn parse_sentences(&self) -> Result<ParseResult, &'static str> {
+    fn parse_sentences(&self) -> Result<Option<ParseResult>, &'static str> {
         let input = from_ascii(&self.buffer[..self.buflen])?;
         let mut iter = input.split(',');
         let sentence_field = iter
@@ -258,11 +352,14 @@ impl Parser {
             return Err("Sentence field is too small. Must be 5 chars at least!");
         }
         let source = Source::try_from(sentence_field)?;
+        if self.source_mask.is_masked(source) {
+            return Ok(None);
+        }
         match &sentence_field[2..5] {
-            "RMC" => Ok(ParseResult::RMC(RMC::parse(source, &mut iter)?)),
-            "GGA" => Ok(ParseResult::GGA(GGA::parse(source, &mut iter)?)),
-            "GLL" => Ok(ParseResult::GLL(GLL::parse(source, &mut iter)?)),
-            "VTG" => Ok(ParseResult::VTG(VTG::parse(source, &mut iter)?)),
+            "RMC" => Ok(Some(ParseResult::RMC(RMC::parse(source, &mut iter)?))),
+            "GGA" => Ok(Some(ParseResult::GGA(GGA::parse(source, &mut iter)?))),
+            "GLL" => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
+            "VTG" => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
             _ => Err("Unsupported sentence type."),
         }
     }
@@ -284,4 +381,23 @@ fn parse_hex_halfbyte(symbol: u8) -> Result<u8, &'static str> {
         return Ok(symbol - b'A' + 10);
     }
     Err("Invalid HEX character.")
+}
+
+#[test]
+fn test_source_bitor() {
+    let s = Source::GLONASS | Source::GPS | Source::Beidou;
+    assert!(s.mask == (Source::GLONASS as u32 | Source::GPS as u32 | Source::Beidou as u32));
+}
+
+#[test]
+fn test_sentence_bitor() {
+    let s = Sentence::RMC | Sentence::VTG | Sentence::GGA;
+    assert!(s.mask == (Sentence::RMC as u32 | Sentence::VTG as u32 | Sentence::GGA as u32));
+}
+
+#[test]
+fn test_create_filtered_parser() {
+    let mut parser = Parser::new()
+        .with_source_filter(Source::GPS | Source::GLONASS)
+        .with_sentence_filter(Sentence::RMC | Sentence::GLL);
 }

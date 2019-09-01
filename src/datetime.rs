@@ -146,3 +146,39 @@ fn test_parse_time() {
     assert!(Time::parse_from_hhmmss(Some("304201.340")).is_err());
     assert!(Time::parse_from_hhmmss(Some("109001.340")).is_err());
 }
+
+#[test]
+fn test_from_date_and_time() {
+    assert!(DateTime::from_date_and_time(
+        Some(Date {
+            day: 1,
+            month: 10,
+            year: 2010
+        }),
+        Some(Time {
+            hours: 1,
+            minutes: 2,
+            seconds: 50.0f32
+        })
+    )
+    .is_ok());
+    assert!(DateTime::from_date_and_time(
+        Some(Date {
+            day: 1,
+            month: 10,
+            year: 2010
+        }),
+        None
+    )
+    .is_err());
+    assert!(DateTime::from_date_and_time(
+        None,
+        Some(Time {
+            hours: 1,
+            minutes: 2,
+            seconds: 50.0f32
+        })
+    )
+    .is_err());
+    assert_eq!(DateTime::from_date_and_time(None, None), Ok(None));
+}

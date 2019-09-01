@@ -126,3 +126,25 @@ impl GPSQuality {
         }
     }
 }
+
+#[test]
+fn test_parse_gpsquality() {
+    assert_eq!(GPSQuality::parse(Some("0")), Ok(Some(GPSQuality::NoFix)));
+    assert_eq!(GPSQuality::parse(Some("1")), Ok(Some(GPSQuality::GPS)));
+    assert_eq!(GPSQuality::parse(Some("2")), Ok(Some(GPSQuality::DGPS)));
+    assert_eq!(GPSQuality::parse(Some("3")), Ok(Some(GPSQuality::PPS)));
+    assert_eq!(GPSQuality::parse(Some("4")), Ok(Some(GPSQuality::RTK)));
+    assert_eq!(GPSQuality::parse(Some("5")), Ok(Some(GPSQuality::FRTK)));
+    assert_eq!(
+        GPSQuality::parse(Some("6")),
+        Ok(Some(GPSQuality::Estimated))
+    );
+    assert_eq!(GPSQuality::parse(Some("7")), Ok(Some(GPSQuality::Manual)));
+    assert_eq!(
+        GPSQuality::parse(Some("8")),
+        Ok(Some(GPSQuality::Simulated))
+    );
+    assert_eq!(GPSQuality::parse(Some("")), Ok(None));
+    assert_eq!(GPSQuality::parse(None), Ok(None));
+    assert!(GPSQuality::parse(Some("9")).is_err());
+}

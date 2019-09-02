@@ -3,15 +3,15 @@
 //! NMEA 0183 parser. Implemented most used sentences like RMC, VTG, GGA, GLL.
 //! Parser do not use heap memory and relies only on `core`.
 //!
-//! You should instantiate `Parser` with `new` and than use methods like `parse_from_byte` or `parse_from_bytes`.
-//! If parser accumulates enough data it will return `ParseResult` on success or `&str` that describing an error.
+//! You should instantiate [Parser](struct.Parser.html) with [new](struct.Parser.html#method.new) and than use methods like [parse_from_byte](struct.Parser.html#method.parse_from_bytes) or [parse_from_bytes](struct.Parser.html#method.parse_from_bytes).
+//! If parser accumulates enough data it will return [ParseResult](enum.ParseResult.html) on success or `&str` that describing an error.
 //!
 //! You do not need to do any preprocessing such as split data to strings or NMEA sentences.
 //!
 //! # Examples
 //!
 //! If you could read a one byte at a time from the receiver you may use `parse_from_byte`:
-//! ```
+//! ```rust
 //! use nmea0183::{Parser, ParseResult};
 //!
 //! let nmea = b"$GPGGA,145659.00,5956.695396,N,03022.454999,E,2,07,0.6,9.0,M,18.0,M,,*62\r\n$GPGGA,,,,,,,,,,,,,,*00\r\n";
@@ -29,7 +29,7 @@
 //! ```
 //!
 //! If you read many bytes from receiver at once or want to parse NMEA log from text file you could use Iterator-style:
-//! ```
+//! ```rust
 //! use nmea0183::{Parser, ParseResult};
 //!
 //! let nmea = b"$GPGGA,,,,,,,,,,,,,,*00\r\n$GPRMC,125504.049,A,5542.2389,N,03741.6063,E,0.06,25.82,200906,,,A*56\r\n";
@@ -44,6 +44,17 @@
 //!     }
 //! }
 //!
+//! ```
+//!
+//! It is possible to ignore some sentences or sources. You can set filter on [Parser](struct.Parser.html) like so:
+//! ```rust
+//! use nmea0183::{Parser, ParseResult, Sentence, Source};
+//!
+//! let parser_only_gps_gallileo = Parser::new()
+//!     .source_filter(Source::GPS | Source::Gallileo);
+//! let parser_only_rmc_gga_gps = Parser::new()
+//!     .source_only(Source::GPS)
+//!     .sentence_filter(Sentence::RMC | Sentence::GGA);
 //! ```
 //!
 //! # Panics
@@ -66,7 +77,6 @@
 //!
 //! GSA and GSV parsing.
 //!
-//! Filtering by sentence type and/or source. Parser will silently drops unneeded sentences/sources.
 use core::convert::TryFrom;
 use core::ops::BitOr;
 use core::slice::Iter;
@@ -101,6 +111,7 @@ pub enum Source {
     GNSS = 0b10000,
 }
 
+/// Mask for Source filter in Parser.
 pub struct SourceMask {
     mask: u32,
 }
@@ -140,7 +151,7 @@ impl BitOr<Source> for SourceMask {
 impl TryFrom<&str> for Source {
     type Error = &'static str;
 
-    fn try_from(from: &str) -> Result<Self, &'static str> {
+    fn try_from(from: &str) -> Result<Self, Self::Error> {
         match &from[0..2] {
             "GP" => Ok(Source::GPS),
             "GL" => Ok(Source::GLONASS),
@@ -152,15 +163,34 @@ impl TryFrom<&str> for Source {
     }
 }
 
-/// Various kinds of NMEA sentence like RMC, VTG or other.
+/// Various kinds of NMEA sentence like RMC, VTG or other. Used for filter by sentence type in Parser.
 #[derive(Debug, Copy, Clone)]
 pub enum Sentence {
+    /// Recommended minimum sentence.
     RMC = 0b1,
+    /// Course over ground.
     VTG = 0b10,
+    /// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
     GGA = 0b100,
+    /// Geographic latitude ang longitude sentence with time of fix and receiver state.
     GLL = 0b1000,
 }
 
+impl TryFrom<&str> for Sentence {
+    type Error = &'static str;
+
+    fn try_from(from: &str) -> Result<Self, Self::Error> {
+        match from {
+            "RMC" => Ok(Sentence::RMC),
+            "GGA" => Ok(Sentence::GGA),
+            "GLL" => Ok(Sentence::GLL),
+            "VTG" => Ok(Sentence::VTG),
+            _ => Err("Unsupported sentence type."),
+        }
+    }
+}
+
+/// Mask for Sentence filter in Parser.
 pub struct SentenceMask {
     mask: u32,
 }
@@ -275,17 +305,31 @@ impl Parser {
             sentence_mask: Default::default(),
         }
     }
-    /// Set filter on possible Sources.
-    pub fn with_source_filter(mut self, source_mask: SourceMask) -> Self {
+    /// Accepts only that [source](enum.Source.html)
+    pub fn source_only(mut self, source: Source) -> Self {
+        self.source_mask = SourceMask {
+            mask: source as u32,
+        };
+        self
+    }
+    /// Ignore all [sources](enum.Source.html) except given.
+    pub fn source_filter(mut self, source_mask: SourceMask) -> Self {
         self.source_mask = source_mask;
         self
     }
-    /// Set filter on possible Sentences.
-    pub fn with_sentence_filter(mut self, sentence_mask: SentenceMask) -> Self {
+    /// Accepts only that [sentence](enum.Sentence.html)
+    pub fn sentence_only(mut self, sentence: Sentence) -> Self {
+        self.sentence_mask = SentenceMask {
+            mask: sentence as u32,
+        };
+        self
+    }
+    /// Ignore all [sentences](enum.Sentence.html) except given.
+    pub fn sentence_filter(mut self, sentence_mask: SentenceMask) -> Self {
         self.sentence_mask = sentence_mask;
         self
     }
-    /// Use parser state and bytes slice than returns Iterator that yield ['ParseResult'] or errors if has enough data for parsing.
+    /// Use parser state and bytes slice than returns Iterator that yield [ParseResult](enum.ParseResult.html) or errors if has enough data for parsing.
     pub fn parse_from_bytes<'a>(
         &'a mut self,
         input: &'a [u8],
@@ -334,7 +378,7 @@ impl Parser {
             },
             ParserState::WaitCR if symbol == b'\r' => (ParserState::WaitLF, None),
             ParserState::WaitLF if symbol == b'\n' => {
-                (ParserState::WaitStart, self.parse_sentences().transpose())
+                (ParserState::WaitStart, self.parse_sentence().transpose())
             }
             _ => (ParserState::WaitStart, Some(Err("NMEA format error!"))),
         };
@@ -342,7 +386,7 @@ impl Parser {
         return result;
     }
 
-    fn parse_sentences(&self) -> Result<Option<ParseResult>, &'static str> {
+    fn parse_sentence(&self) -> Result<Option<ParseResult>, &'static str> {
         let input = from_ascii(&self.buffer[..self.buflen])?;
         let mut iter = input.split(',');
         let sentence_field = iter
@@ -355,12 +399,15 @@ impl Parser {
         if self.source_mask.is_masked(source) {
             return Ok(None);
         }
-        match &sentence_field[2..5] {
-            "RMC" => Ok(Some(ParseResult::RMC(RMC::parse(source, &mut iter)?))),
-            "GGA" => Ok(Some(ParseResult::GGA(GGA::parse(source, &mut iter)?))),
-            "GLL" => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
-            "VTG" => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
-            _ => Err("Unsupported sentence type."),
+        let sentence = Sentence::try_from(&sentence_field[2..5])?;
+        if self.sentence_mask.is_masked(sentence) {
+            return Ok(None);
+        }
+        match sentence {
+            Sentence::RMC => Ok(Some(ParseResult::RMC(RMC::parse(source, &mut iter)?))),
+            Sentence::GGA => Ok(Some(ParseResult::GGA(GGA::parse(source, &mut iter)?))),
+            Sentence::GLL => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
+            Sentence::VTG => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
         }
     }
 }
@@ -397,7 +444,10 @@ fn test_sentence_bitor() {
 
 #[test]
 fn test_create_filtered_parser() {
-    let mut parser = Parser::new()
-        .with_source_filter(Source::GPS | Source::GLONASS)
-        .with_sentence_filter(Sentence::RMC | Sentence::GLL);
+    let _parser = Parser::new()
+        .source_filter(Source::GPS | Source::GLONASS)
+        .sentence_filter(Sentence::RMC | Sentence::GLL);
+    let _parser = Parser::new()
+        .source_only(Source::GPS)
+        .sentence_only(Sentence::RMC);
 }

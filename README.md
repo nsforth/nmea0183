@@ -1,73 +1,81 @@
 [![Crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange.svg?longCache=true)](https://crates.io/crates/nmea0183/0.1.0)
 [![Build Status](https://travis-ci.org/nsforth/nmea0183.svg?branch=master)](https://travis-ci.org/nsforth/nmea0183)
 [![Codecov coverage status](https://codecov.io/gh/nsforth/nmea0183/branch/master/graph/badge.svg)](https://codecov.io/gh/nsforth/nmea0183)
+# NMEA 0183 parser.
 
-# NMEA 0183 Parser.
+Implemented most used sentences like RMC, VTG, GGA, GLL.
+Parser do not use heap memory and relies only on `core`.
 
- Implemented most used sentences like RMC, VTG, GGA, GLL.
- Parser do not use heap memory and relies only on `core`.
+You should instantiate [Parser](struct.Parser.html) with [new](struct.Parser.html#method.new) and than use methods like [parse_from_byte](struct.Parser.html#method.parse_from_bytes) or [parse_from_bytes](struct.Parser.html#method.parse_from_bytes).
+If parser accumulates enough data it will return [ParseResult](enum.ParseResult.html) on success or `&str` that describing an error.
 
- You should instantiate `Parser` with `new` and than use methods like `parse_from_byte` or `parse_from_bytes`.
- If parser accumulates enough data it will return `ParseResult` on success or `&str` that describing an error.
+You do not need to do any preprocessing such as split data to strings or NMEA sentences.
 
- You do not need to do any preprocessing such as split data to strings or NMEA sentences.
+# Examples
 
- # Examples
+If you could read a one byte at a time from the receiver you may use `parse_from_byte`:
+```rust
+use nmea0183::{Parser, ParseResult};
 
- If you could read a one byte at a time from the receiver you may use `parse_from_byte`:
- ```rust
- use nmea0183::{Parser, ParseResult};
+let nmea = b"$GPGGA,145659.00,5956.695396,N,03022.454999,E,2,07,0.6,9.0,M,18.0,M,,*62\r\n$GPGGA,,,,,,,,,,,,,,*00\r\n";
+let mut parser = Parser::new();
+for b in &nmea[..] {
+    if let Some(result) = parser.parse_from_byte(*b) {
+        match result {
+            Ok(ParseResult::GGA(Some(gga))) => { }, // Got GGA sentence
+            Ok(ParseResult::GGA(None)) => { }, // Got GGA sentence without valid data, receiver ok but has no solution
+            Ok(_) => {}, // Some other sentences..
+            Err(e) => { } // Got parse error
+        }
+    }
+}
+```
 
- let nmea = b"$GPGGA,145659.00,5956.695396,N,03022.454999,E,2,07,0.6,9.0,M,18.0,M,,*62\r\n$GPGGA,,,,,,,,,,,,,,*00\r\n";
- let mut parser = Parser::new();
- for b in &nmea[..] {
-     if let Some(result) = parser.parse_from_byte(*b) {
-         match result {
-             Ok(ParseResult::GGA(Some(gga))) => { }, // Got GGA sentence
-             Ok(ParseResult::GGA(None)) => { }, // Got GGA sentence without valid data, receiver ok but has no solution
-             Ok(_) => {}, // Some other sentences..
-             Err(e) => { } // Got parse error
-         }
-     }
- }
- ```
+If you read many bytes from receiver at once or want to parse NMEA log from text file you could use Iterator-style:
+```rust
+use nmea0183::{Parser, ParseResult};
 
- If you read many bytes from receiver at once or want to parse NMEA log from text file you could use Iterator-style:
- ```rust
- use nmea0183::{Parser, ParseResult};
+let nmea = b"$GPGGA,,,,,,,,,,,,,,*00\r\n$GPRMC,125504.049,A,5542.2389,N,03741.6063,E,0.06,25.82,200906,,,A*56\r\n";
+let mut parser = Parser::new();
 
- let nmea = b"$GPGGA,,,,,,,,,,,,,,*00\r\n$GPRMC,125504.049,A,5542.2389,N,03741.6063,E,0.06,25.82,200906,,,A*56\r\n";
- let mut parser = Parser::new();
+for result in parser.parse_from_bytes(&nmea[..]) {
+    match result {
+        Ok(ParseResult::RMC(Some(rmc))) => { }, // Got RMC sentence
+        Ok(ParseResult::GGA(None)) => { }, // Got GGA sentence without valid data, receiver ok but has no solution
+        Ok(_) => {}, // Some other sentences..
+        Err(e) => { } // Got parse error
+    }
+}
+```
 
- for result in parser.parse_from_bytes(&nmea[..]) {
-     match result {
-         Ok(ParseResult::RMC(Some(rmc))) => { }, // Got RMC sentence
-         Ok(ParseResult::GGA(None)) => { }, // Got GGA sentence without valid data, receiver ok but has no solution
-         Ok(_) => {}, // Some other sentences..
-         Err(e) => { } // Got parse error
-     }
- }
+It is possible to ignore some sentences or sources. You can set filter on [Parser](struct.Parser.html) like so:
+```rust
+use nmea0183::{Parser, ParseResult, Sentence, Source};
 
- ```
+let parser_only_gps_gallileo = Parser::new()
+    .source_filter(Source::GPS | Source::Gallileo);
+let parser_only_rmc_gga_gps = Parser::new()
+    .source_only(Source::GPS)
+    .sentence_filter(Sentence::RMC | Sentence::GGA);
+```
 
- # Panics
+# Panics
 
- Should not panic. If so please report issue on project page.
+Should not panic. If so please report issue on project page.
 
- # Errors
+# Errors
 
- `Unsupported sentence type.` - Got currently not supported sentence.
+`Unsupported sentence type.` - Got currently not supported sentence.
 
- `Checksum error!` - Sentence has wrong checksum, possible data corruption.
+`Checksum error!` - Sentence has wrong checksum, possible data corruption.
 
- `Source is not supported!` - Unknown source, new sattelite system is launched? :)
+`Source is not supported!` - Unknown source, new sattelite system is launched? :)
 
- `NMEA format error!` - Possible data corruption. Parser drops all accumulated data and starts seek new sentences.
+`NMEA format error!` - Possible data corruption. Parser drops all accumulated data and starts seek new sentences.
 
- It's possible to got other very rare error messages that relates to protocol errors. Receivers nowadays mostly do not violate NMEA specs.
+It's possible to got other very rare error messages that relates to protocol errors. Receivers nowadays mostly do not violate NMEA specs.
 
- # Planned features
+# Planned features
 
- GSA and GSV parsing.
+GSA and GSV parsing.
 
- Filtering by sentence type and/or source. Parser will silently drops unneeded sentences/sources.

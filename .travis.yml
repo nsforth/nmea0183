@@ -6,6 +6,11 @@ rust:
   - stable
   - beta
 
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+\.\d+$/
+
 addons:
   apt:
     packages:

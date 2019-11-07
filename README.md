@@ -6,8 +6,8 @@
 Implemented most used sentences like RMC, VTG, GGA, GLL.
 Parser do not use heap memory and relies only on `core`.
 
-You should instantiate [Parser](struct.Parser.html) with [new](struct.Parser.html#method.new) and than use methods like [parse_from_byte](struct.Parser.html#method.parse_from_bytes) or [parse_from_bytes](struct.Parser.html#method.parse_from_bytes).
-If parser accumulates enough data it will return [ParseResult](enum.ParseResult.html) on success or `&str` that describing an error.
+You should instantiate [Parser](https://docs.rs/nmea0183/0.2.2/nmea0183/struct.Parser.html) with [new](https://docs.rs/nmea0183/0.2.2/nmea0183/struct.Parser.html#method.new) and than use methods like [parse_from_byte](https://docs.rs/nmea0183/0.2.2/nmea0183/struct.Parser.html#method.parse_from_bytes) or [parse_from_bytes](https://docs.rs/nmea0183/0.2.2/nmea0183/struct.Parser.html#method.parse_from_bytes).
+If parser accumulates enough data it will return [ParseResult](https://docs.rs/nmea0183/0.2.2/nmea0183/enum.ParseResult.html) on success or `&str` that describing an error.
 
 You do not need to do any preprocessing such as split data to strings or NMEA sentences.
 
@@ -48,7 +48,7 @@ for result in parser.parse_from_bytes(&nmea[..]) {
 }
 ```
 
-It is possible to ignore some sentences or sources. You can set filter on [Parser](struct.Parser.html) like so:
+It is possible to ignore some sentences or sources. You can set filter on [Parser](https://docs.rs/nmea0183/0.2.2/nmea0183/struct.Parser.html) like so:
 ```rust
 use nmea0183::{Parser, ParseResult, Sentence, Source};
 

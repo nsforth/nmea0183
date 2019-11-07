@@ -10,6 +10,23 @@ use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
 
 #[test]
+fn test_too_long_sentence() {
+    let line = "$01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    let mut caught_error = false;
+    for result in Parser::new().parse_from_bytes(line.as_bytes()) {
+        match result {
+            Ok(_) => continue,
+            Err("NMEA sentence is too long!") => {
+                caught_error = true;
+                break;
+            },
+            Err(_) => panic!("Unexpected error caught in test!")
+        }
+    }
+    assert!(caught_error);
+}
+
+#[test]
 fn test_correct_but_unsupported_source() {
     let mut p = Parser::new();
     let sentence = b"$LCVTG,089.0,T,,,15.2,N,,*67\r\n";

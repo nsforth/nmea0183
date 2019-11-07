@@ -346,7 +346,7 @@ impl Parser {
             }
             ParserState::WaitStart if symbol != b'$' => (ParserState::WaitStart, None),
             ParserState::ReadUntilChkSum if symbol != b'*' => {
-                if self.buffer.len() < self.buflen {
+                if self.buffer.len() <= self.buflen {
                     (
                         ParserState::WaitStart,
                         Some(Err("NMEA sentence is too long!")),

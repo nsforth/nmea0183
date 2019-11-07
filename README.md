@@ -1,5 +1,5 @@
-[![Crates.io](https://img.shields.io/badge/crates.io-v0.2.1-orange.svg?longCache=true)](https://crates.io/crates/nmea0183/0.2.1)
-[![Build Status](https://travis-ci.org/nsforth/nmea0183.svg?tag=v0.2.1)](https://travis-ci.org/nsforth/nmea0183)
+[![Crates.io](https://img.shields.io/badge/crates.io-v0.2.2-orange.svg?longCache=true)](https://crates.io/crates/nmea0183/0.2.2)
+[![Build Status](https://travis-ci.org/nsforth/nmea0183.svg?tag=v0.2.2)](https://travis-ci.org/nsforth/nmea0183)
 [![Codecov coverage status](https://codecov.io/gh/nsforth/nmea0183/branch/master/graph/badge.svg)](https://codecov.io/gh/nsforth/nmea0183)
 # NMEA 0183 parser.
 

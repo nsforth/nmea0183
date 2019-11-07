@@ -1,6 +1,6 @@
 [package]
 name = "nmea0183"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Nikita Staroverov <nsforth@gmail.com>"]
 edition = "2018"
 description = "NMEA 0183 parser targetting mostly embedded devices but not limited to."
@@ -14,7 +14,7 @@ readme = "README.md"
 [dependencies]
 
 [badges]
-travis-ci = { repository = "nsforth/nmea0183", branch = "v0.2.1" }
+travis-ci = { repository = "nsforth/nmea0183", branch = "v0.2.2" }
 codecov = { repository = "nsforth/nmea0183"}
 is-it-maintained-issue-resolution = { repository = "nsforth/nmea0183" }
 is-it-maintained-open-issues = { repository = "nsforth/nmea0183" }

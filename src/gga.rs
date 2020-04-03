@@ -5,7 +5,7 @@ use crate::Source;
 use core::time::Duration;
 
 /// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct GGA {
     /// Navigational system.
     pub source: Source,
@@ -86,7 +86,7 @@ impl GGA {
 }
 
 /// Quality of GPS solution
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum GPSQuality {
     /// No solution
     NoFix,

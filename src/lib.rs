@@ -230,7 +230,7 @@ impl BitOr<Sentence> for SentenceMask {
 /// The NMEA sentence parsing result.
 /// Sentences with many null fields or sentences without valid data is also parsed and returned as None.
 /// None ParseResult may be interpreted as working receiver but without valid data.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ParseResult {
     /// The Recommended Minimum Sentence for any GNSS. Typically most used.
     RMC(Option<RMC>),

@@ -4,7 +4,7 @@ use crate::modes::{Mode, Status};
 use crate::Source;
 
 /// Geographic latitude ang longitude sentence with time of fix and receiver state.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct GLL {
     /// Navigational system.
     pub source: Source,

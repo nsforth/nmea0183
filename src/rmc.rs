@@ -4,7 +4,7 @@ use crate::modes::{Mode, Status};
 use crate::Source;
 
 /// Recommended Minimum Sentence for any GNSS source.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct RMC {
     /// Navigational system.
     pub source: Source,

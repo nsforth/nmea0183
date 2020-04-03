@@ -15,7 +15,7 @@ impl Status {
 }
 
 /// Receiver mode of operation.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Mode {
     /// Autonomous mode without any external correction.
     Autonomous,

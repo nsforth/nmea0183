@@ -276,6 +276,10 @@ impl Speed {
             knots: speed * 0.539957f32,
         }
     }
+    /// Speed as knots
+    pub fn as_knots(&self) -> f32 {
+      self.knots
+    }
     /// Speed as kilometers per hour
     pub fn as_kph(&self) -> f32 {
         self.knots * 1.852

@@ -145,6 +145,8 @@ fn test_parse_time() {
     assert_eq!(time.seconds, 1.34);
     assert!(Time::parse_from_hhmmss(Some("304201.340")).is_err());
     assert!(Time::parse_from_hhmmss(Some("109001.340")).is_err());
+    // Checking boundary conditions
+    assert!(Time::parse_from_hhmmss(Some("235959.999")).is_ok());
 }
 
 #[test]

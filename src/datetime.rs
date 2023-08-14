@@ -77,7 +77,7 @@ impl Time {
                     .parse()
                     .map_err(|_| "Minutes string is not a number!")
                     .and_then(|m| {
-                        if m < 59 {
+                        if m < 60 {
                             Ok(m)
                         } else {
                             Err("Minutes is not in range 0-59")

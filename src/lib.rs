@@ -83,7 +83,11 @@ use core::slice::Iter;
 pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
+pub mod satellite;
+
 pub(crate) mod gga;
+pub(crate) mod gsv;
+
 pub(crate) mod gll;
 pub(crate) mod modes;
 pub(crate) mod rmc;
@@ -92,10 +96,10 @@ pub(crate) mod vtg;
 pub use gga::GPSQuality;
 pub use gga::GGA;
 pub use gll::GLL;
+pub use gsv::GSV;
 pub use modes::Mode;
 pub use rmc::RMC;
 pub use vtg::VTG;
-
 /// Source of NMEA sentence like GPS, GLONASS or other.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Source {
@@ -174,6 +178,8 @@ pub enum Sentence {
     GGA = 0b100,
     /// Geographic latitude ang longitude sentence with time of fix and receiver state.
     GLL = 0b1000,
+    /// Satellites in views.
+    GSV = 0b10000,
 }
 
 impl TryFrom<&str> for Sentence {
@@ -185,6 +191,7 @@ impl TryFrom<&str> for Sentence {
             "GGA" => Ok(Sentence::GGA),
             "GLL" => Ok(Sentence::GLL),
             "VTG" => Ok(Sentence::VTG),
+            "GSV" => Ok(Sentence::GSV),
             _ => Err("Unsupported sentence type."),
         }
     }
@@ -240,6 +247,8 @@ pub enum ParseResult {
     GLL(Option<GLL>),
     /// The actual course and speed relative to the ground.
     VTG(Option<VTG>),
+    /// The satellites in views including the number of SVs in view, the PRN numbers, elevations, azimuths, and SNR values.
+    GSV(Option<GSV>),
 }
 
 /// Parses NMEA sentences and stores intermediate parsing state.
@@ -408,6 +417,7 @@ impl Parser {
             Sentence::GGA => Ok(Some(ParseResult::GGA(GGA::parse(source, &mut iter)?))),
             Sentence::GLL => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
             Sentence::VTG => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
+            Sentence::GSV => Ok(Some(ParseResult::GSV(GSV::parse(source, &mut iter)?))),
         }
     }
 }

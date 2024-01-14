@@ -62,7 +62,7 @@ impl Prn {
                 };
                 match adjusted_prn_number {
                     Some(number) => Ok(Some(Prn { number })),
-                    None => Err("Could not parse prn"),
+                    None => Err("Could not parse Prn: number not match GNSS system Prn range"),
                 }
             }
         } else {

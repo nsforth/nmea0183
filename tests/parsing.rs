@@ -2,9 +2,11 @@ use core::convert::TryFrom;
 use nmea0183::coords;
 use nmea0183::datetime;
 use nmea0183::GPSQuality;
+use nmea0183::JammingStatus;
 use nmea0183::Mode;
 use nmea0183::GGA;
 use nmea0183::GLL;
+use nmea0183::PMTKSPF;
 use nmea0183::RMC;
 use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
@@ -19,8 +21,8 @@ fn test_too_long_sentence() {
             Err("NMEA sentence is too long!") => {
                 caught_error = true;
                 break;
-            },
-            Err(_) => panic!("Unexpected error caught in test!")
+            }
+            Err(_) => panic!("Unexpected error caught in test!"),
         }
     }
     assert!(caught_error);
@@ -238,6 +240,22 @@ fn test_correct_gll() {
                 latitude: TryFrom::try_from(49.2741666667).unwrap(),
                 longitude: TryFrom::try_from(-123.18533333334).unwrap(),
                 mode: Mode::Autonomous
+            })))
+        );
+    }
+}
+
+#[test]
+fn test_correct_pmtk() {
+    let mut p = Parser::new();
+    let b = b"$PMTKSPF,2*59\r\n";
+    {
+        let mut iter = p.parse_from_bytes(&b[..]);
+        assert_eq!(
+            iter.next().unwrap(),
+            Ok(ParseResult::PMTK(Some(PMTKSPF {
+                source: Source::MTK,
+                jamming_status: JammingStatus::Warning
             })))
         );
     }

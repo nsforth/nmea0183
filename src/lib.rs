@@ -86,6 +86,7 @@ pub mod datetime;
 pub(crate) mod gga;
 pub(crate) mod gll;
 pub(crate) mod modes;
+pub(crate) mod mtk;
 pub(crate) mod rmc;
 pub(crate) mod vtg;
 
@@ -93,6 +94,9 @@ pub use gga::GPSQuality;
 pub use gga::GGA;
 pub use gll::GLL;
 pub use modes::Mode;
+pub use mtk::JammingStatus;
+pub use mtk::MTKPacketType;
+pub use mtk::PMTKSPF;
 pub use rmc::RMC;
 pub use vtg::VTG;
 
@@ -109,6 +113,8 @@ pub enum Source {
     Beidou = 0b1000,
     /// Global Navigation Sattelite System. Some combination of other systems. Depends on receiver model, receiver settings, etc..
     GNSS = 0b10000,
+    /// MediaTek NMEA packet protocol
+    MTK = 0b100000,
 }
 
 /// Mask for Source filter in Parser.
@@ -158,6 +164,7 @@ impl TryFrom<&str> for Source {
             "GA" => Ok(Source::Gallileo),
             "BD" => Ok(Source::Beidou),
             "GN" => Ok(Source::GNSS),
+            "PM" => Ok(Source::MTK),
             _ => Err("Source is not supported!"),
         }
     }
@@ -174,6 +181,8 @@ pub enum Sentence {
     GGA = 0b100,
     /// Geographic latitude ang longitude sentence with time of fix and receiver state.
     GLL = 0b1000,
+    /// MTK properitary messages.
+    PMTK = 0b10000,
 }
 
 impl TryFrom<&str> for Sentence {
@@ -185,6 +194,7 @@ impl TryFrom<&str> for Sentence {
             "GGA" => Ok(Sentence::GGA),
             "GLL" => Ok(Sentence::GLL),
             "VTG" => Ok(Sentence::VTG),
+            "PMTK" => Ok(Sentence::PMTK),
             _ => Err("Unsupported sentence type."),
         }
     }
@@ -240,6 +250,8 @@ pub enum ParseResult {
     GLL(Option<GLL>),
     /// The actual course and speed relative to the ground.
     VTG(Option<VTG>),
+    /// The MTK properitary messages.
+    PMTK(Option<PMTKSPF>),
 }
 
 /// Parses NMEA sentences and stores intermediate parsing state.
@@ -399,7 +411,12 @@ impl Parser {
         if self.source_mask.is_masked(source) {
             return Ok(None);
         }
-        let sentence = Sentence::try_from(&sentence_field[2..5])?;
+
+        let sentence = match source {
+            Source::MTK => Sentence::try_from(&sentence_field[0..4])?,
+            _ => Sentence::try_from(&sentence_field[2..5])?,
+        };
+
         if self.sentence_mask.is_masked(sentence) {
             return Ok(None);
         }
@@ -408,6 +425,16 @@ impl Parser {
             Sentence::GGA => Ok(Some(ParseResult::GGA(GGA::parse(source, &mut iter)?))),
             Sentence::GLL => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
             Sentence::VTG => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
+            Sentence::PMTK => {
+                if sentence_field.len() < 7 {
+                    return Err("PMTK Sentence field is too small. Must be 7 chars at least!");
+                }
+                match MTKPacketType::try_from(&sentence_field[4..7])? {
+                    MTKPacketType::SPF => {
+                        Ok(Some(ParseResult::PMTK(PMTKSPF::parse(source, &mut iter)?)))
+                    }
+                }
+            }
         }
     }
 }

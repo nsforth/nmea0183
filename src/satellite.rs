@@ -43,7 +43,7 @@ impl Satellite {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Prn {
     /// Satellite pseudo-random noise number based on source of NMEA sentence
-    pub numbers: u8,
+    pub number: u8,
 }
 
 impl Prn {
@@ -52,16 +52,16 @@ impl Prn {
             if input.len() == 0 {
                 Ok(None)
             } else {
-                let original_prn_numbers =
+                let original_prn_number =
                     input.parse::<u8>().map_err(|_| "Wrong prn field format")?;
 
-                let adjusted_prn_numbers = match source {
-                    Source::Beidou => original_prn_numbers.checked_sub(100),
-                    Source::GLONASS => original_prn_numbers.checked_sub(64),
-                    _ => Some(original_prn_numbers),
+                let adjusted_prn_number = match source {
+                    Source::Beidou => original_prn_number.checked_sub(100),
+                    Source::GLONASS => original_prn_number.checked_sub(64),
+                    _ => Some(original_prn_number),
                 };
-                match adjusted_prn_numbers {
-                    Some(numbers) => Ok(Some(Prn { numbers })),
+                match adjusted_prn_number {
+                    Some(number) => Ok(Some(Prn { number })),
                     None => Err("Could not parse prn"),
                 }
             }

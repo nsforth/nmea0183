@@ -257,25 +257,25 @@ fn test_correct_gsv() {
                 message_number: 1,
                 sat_in_view: 25,
                 sat_info_1: Some(satellite::Satellite {
-                    prn: satellite::Prn { numbers: 21 },
+                    prn: satellite::Prn { number: 21 },
                     elevation: 44,
                     azimuth: 141,
                     snr: Some(47)
                 }),
                 sat_info_2: Some(satellite::Satellite {
-                    prn: satellite::Prn { numbers: 15 },
+                    prn: satellite::Prn { number: 15 },
                     elevation: 14,
                     azimuth: 49,
                     snr: Some(44)
                 }),
                 sat_info_3: Some(satellite::Satellite {
-                    prn: satellite::Prn { numbers: 6 },
+                    prn: satellite::Prn { number: 6 },
                     elevation: 31,
                     azimuth: 255,
                     snr: Some(46)
                 }),
                 sat_info_4: Some(satellite::Satellite {
-                    prn: satellite::Prn { numbers: 3 },
+                    prn: satellite::Prn { number: 3 },
                     elevation: 25,
                     azimuth: 280,
                     snr: Some(44)
@@ -298,7 +298,7 @@ fn test_correct_gsv2() {
                 message_number: 7,
                 sat_in_view: 25,
                 sat_info_1: Some(satellite::Satellite {
-                    prn: satellite::Prn { numbers: 4 },
+                    prn: satellite::Prn { number: 4 },
                     elevation: 37,
                     azimuth: 284,
                     snr: Some(50)

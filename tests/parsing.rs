@@ -6,7 +6,6 @@ use nmea0183::GPSQuality;
 use nmea0183::Mode;
 use nmea0183::GGA;
 use nmea0183::GLL;
-use nmea0183::GSV;
 use nmea0183::RMC;
 use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
@@ -250,38 +249,45 @@ fn test_correct_gsv() {
     let b = b"$GPGSV,8,1,25,21,44,141,47,15,14,049,44,6,31,255,46,3,25,280,44*75\r\n";
     {
         let mut iter = p.parse_from_bytes(&b[..]);
+        let gsv = match iter.next().unwrap().unwrap() {
+            ParseResult::GSV(Some(gsv)) => gsv,
+            _ => {
+                panic!("Unexpected ParseResult variant while parsing GSV data.");
+            }
+        };
+        assert_eq!(gsv.total_messages_number, 8);
+        assert_eq!(gsv.message_number, 1);
+        assert_eq!(gsv.sat_in_view, 25);
+
         assert_eq!(
-            iter.next().unwrap(),
-            Ok(ParseResult::GSV(Some(GSV {
-                total_messages_number: 8,
-                message_number: 1,
-                sat_in_view: 25,
-                sat_info_1: Some(satellite::Satellite {
+            gsv.get_satellites(),
+            [
+                satellite::Satellite {
                     prn: satellite::Prn { number: 21 },
                     elevation: 44,
                     azimuth: 141,
                     snr: Some(47)
-                }),
-                sat_info_2: Some(satellite::Satellite {
+                },
+                satellite::Satellite {
                     prn: satellite::Prn { number: 15 },
                     elevation: 14,
                     azimuth: 49,
                     snr: Some(44)
-                }),
-                sat_info_3: Some(satellite::Satellite {
+                },
+                satellite::Satellite {
                     prn: satellite::Prn { number: 6 },
                     elevation: 31,
                     azimuth: 255,
                     snr: Some(46)
-                }),
-                sat_info_4: Some(satellite::Satellite {
+                },
+                satellite::Satellite {
                     prn: satellite::Prn { number: 3 },
                     elevation: 25,
                     azimuth: 280,
                     snr: Some(44)
-                })
-            })))
-        );
+                }
+            ],
+        )
     }
 }
 
@@ -291,23 +297,25 @@ fn test_correct_gsv2() {
     let b = b"$GLGSV,8,7,25,68,37,284,50*5C\r\n";
     {
         let mut iter = p.parse_from_bytes(&b[..]);
+        let gsv = match iter.next().unwrap().unwrap() {
+            ParseResult::GSV(Some(gsv)) => gsv,
+            _ => {
+                panic!("Unexpected ParseResult variant while parsing GSV data.");
+            }
+        };
+        assert_eq!(gsv.total_messages_number, 8);
+        assert_eq!(gsv.message_number, 7);
+        assert_eq!(gsv.sat_in_view, 25);
+
         assert_eq!(
-            iter.next().unwrap(),
-            Ok(ParseResult::GSV(Some(GSV {
-                total_messages_number: 8,
-                message_number: 7,
-                sat_in_view: 25,
-                sat_info_1: Some(satellite::Satellite {
-                    prn: satellite::Prn { number: 4 },
-                    elevation: 37,
-                    azimuth: 284,
-                    snr: Some(50)
-                }),
-                sat_info_2: None,
-                sat_info_3: None,
-                sat_info_4: None
-            })))
-        );
+            gsv.get_satellites(),
+            [satellite::Satellite {
+                prn: satellite::Prn { number: 4 },
+                elevation: 37,
+                azimuth: 284,
+                snr: Some(50)
+            },],
+        )
     }
 }
 

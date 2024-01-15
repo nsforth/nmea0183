@@ -4,7 +4,7 @@ use crate::common;
 use crate::Source;
 
 ///Information about satellite in view.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Satellite {
     /// Satellite pseudo-random noise number.
     pub prn: Prn,
@@ -40,7 +40,7 @@ impl Satellite {
 }
 
 ///Satellite pseudo-random noise number
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Prn {
     /// Satellite pseudo-random noise number based on source of NMEA sentence
     pub number: u8,

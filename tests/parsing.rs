@@ -3,9 +3,11 @@ use nmea0183::coords;
 use nmea0183::datetime;
 use nmea0183::satellite;
 use nmea0183::GPSQuality;
+use nmea0183::JammingStatus;
 use nmea0183::Mode;
 use nmea0183::GGA;
 use nmea0183::GLL;
+use nmea0183::PMTKSPF;
 use nmea0183::RMC;
 use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
@@ -316,6 +318,21 @@ fn test_correct_gsv2() {
                 snr: Some(50)
             },],
         )
+  }
+}
+#[test]
+fn test_correct_pmtk() {
+    let mut p = Parser::new();
+    let b = b"$PMTKSPF,2*59\r\n";
+    {
+        let mut iter = p.parse_from_bytes(&b[..]);
+        assert_eq!(
+            iter.next().unwrap(),
+            Ok(ParseResult::PMTK(Some(PMTKSPF {
+                source: Source::MTK,
+                jamming_status: JammingStatus::Warning
+            })))
+        );
     }
 }
 

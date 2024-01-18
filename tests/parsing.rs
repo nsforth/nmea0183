@@ -2,6 +2,7 @@ use core::convert::TryFrom;
 use nmea0183::coords;
 use nmea0183::datetime;
 use nmea0183::satellite;
+use nmea0183::FixType;
 use nmea0183::GPSQuality;
 use nmea0183::JammingStatus;
 use nmea0183::Mode;
@@ -318,7 +319,7 @@ fn test_correct_gsv2() {
                 snr: Some(50)
             },],
         )
-  }
+    }
 }
 #[test]
 fn test_correct_pmtk() {
@@ -333,6 +334,26 @@ fn test_correct_pmtk() {
                 jamming_status: JammingStatus::Warning
             })))
         );
+    }
+}
+
+#[test]
+fn test_correct_gsa() {
+    let mut p = Parser::new();
+    let b = b"$GNGSA,A,3,21,5,29,25,12,10,26,2,,,,,1.2,0.7,1.0*27\r\n";
+    {
+        let mut iter = p.parse_from_bytes(&b[..]);
+        let gsa = match iter.next().unwrap().unwrap() {
+            ParseResult::GSA(Some(gsa)) => gsa,
+            _ => {
+                panic!("Unexpected ParseResult variant while parsing GSA data.");
+            }
+        };
+        assert_eq!(gsa.mode, Mode::Autonomous);
+        assert_eq!(gsa.fix_type, FixType::Fix3D);
+        assert_eq!(gsa.pdop, 1.2);
+        assert_eq!(gsa.hdop, 0.7);
+        assert_eq!(gsa.vdop, 1.0);
     }
 }
 

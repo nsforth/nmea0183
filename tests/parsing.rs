@@ -264,7 +264,7 @@ fn test_correct_gsv() {
         assert_eq!(gsv.sat_in_view, 25);
 
         assert_eq!(
-            gsv.get_satellites(),
+            gsv.get_in_view_satellites(),
             [
                 satellite::Satellite {
                     prn: 21,
@@ -313,7 +313,7 @@ fn test_correct_gsv2() {
         assert_eq!(gsv.sat_in_view, 25);
 
         assert_eq!(
-            gsv.get_satellites(),
+            gsv.get_in_view_satellites(),
             [satellite::Satellite {
                 prn: 68,
                 elevation: 37,

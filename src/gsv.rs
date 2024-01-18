@@ -54,8 +54,8 @@ impl GSV {
             Ok(None)
         }
     }
-    /// Retrieves a slice containing the valid satellite information present in the GSV message.
-    pub fn get_satellites(&self) -> &[Satellite] {
+    /// Retrieves a slice containing in view satellites information present in the GSV message.
+    pub fn get_in_view_satellites(&self) -> &[Satellite] {
         &self.satellites[..self.satellite_array_size]
     }
 }

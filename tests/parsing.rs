@@ -351,8 +351,10 @@ fn test_correct_gsa() {
                 panic!("Unexpected ParseResult variant while parsing GSA data.");
             }
         };
+        assert_eq!(gsa.source, Source::GNSS);
         assert_eq!(gsa.mode, Mode::Autonomous);
         assert_eq!(gsa.fix_type, FixType::Fix3D);
+        assert_eq!(gsa.get_fix_satellites_prn(), [21, 5, 29, 25, 12, 10, 26, 2]);
         assert_eq!(gsa.pdop, 1.2);
         assert_eq!(gsa.hdop, 0.7);
         assert_eq!(gsa.vdop, 1.0);

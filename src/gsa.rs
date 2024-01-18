@@ -1,18 +1,19 @@
 use crate::common;
 use crate::modes::Mode;
-use crate::satellite::Prn;
 use crate::Source;
 const MAX_PRNS_PER_MESSAGE: usize = 12;
 
 /// GPS DOP and active satellites
 #[derive(Debug, PartialEq, Clone)]
 pub struct GSA {
+    /// Navigational system.
+    pub source: Source,
     /// Receiver's mode of operation.
     pub mode: Mode,
     /// Fix type indicating if it's a 2D or 3D fix.
     pub fix_type: FixType,
     /// Array of PRNs for satellites used in the fix.
-    fix_sats_prn: [Prn; MAX_PRNS_PER_MESSAGE],
+    fix_sats_prn: [u16; MAX_PRNS_PER_MESSAGE],
     /// The actual number of PRNs in the array.
     prn_array_size: usize,
     /// Position dilution of precision
@@ -30,10 +31,10 @@ impl GSA {
     ) -> Result<Option<Self>, &'static str> {
         let mode = Mode::from_some_str(fields.next())?;
         let fix_type = FixType::parse(fields.next())?;
-        let mut fix_sats_prn: [Prn; MAX_PRNS_PER_MESSAGE] = Default::default();
+        let mut fix_sats_prn: [u16; MAX_PRNS_PER_MESSAGE] = Default::default();
         let mut prn_array_size = 0;
         for prn in fix_sats_prn.iter_mut() {
-            if let Some(parsed_prn) = Prn::parse(fields.next(), source)? {
+            if let Some(parsed_prn) = common::parse_u16(fields.next())? {
                 *prn = parsed_prn;
                 prn_array_size += 1;
             }
@@ -44,6 +45,7 @@ impl GSA {
 
         if let (Some(fix_type), Some(pdop), Some(hdop), Some(vdop)) = (fix_type, pdop, hdop, vdop) {
             Ok(Some(GSA {
+                source,
                 mode,
                 fix_type,
                 fix_sats_prn,
@@ -57,7 +59,7 @@ impl GSA {
         }
     }
     /// Retrieves a slice containing the PRNs for satellites used in the fix in the GSA message.
-    pub fn get_satellites_prn(&self) -> &[Prn] {
+    pub fn get_fix_satellites_prn(&self) -> &[u16] {
         &self.fix_sats_prn[..self.prn_array_size]
     }
 }

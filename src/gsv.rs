@@ -5,6 +5,8 @@ const MAX_SATELLITES_PER_MESSAGE: usize = 4;
 /// Satellites in views including the number of SVs in view, the PRN numbers, elevations, azimuths, and SNR values.
 #[derive(Debug, PartialEq, Clone)]
 pub struct GSV {
+    /// Navigational system.
+    pub source: Source,
     /// The total number of GSV messages for the current data.
     pub total_messages_number: u8,
     /// The message number (1 to the total number of messages) for the current GSV sentence.
@@ -29,7 +31,7 @@ impl GSV {
         let mut satellite_array_size = 0;
 
         for satellite in satellites.iter_mut() {
-            if let Some(parsed_satellite) = Satellite::parse(fields, source)? {
+            if let Some(parsed_satellite) = Satellite::parse(fields)? {
                 *satellite = parsed_satellite;
                 satellite_array_size += 1;
             } else {
@@ -41,6 +43,7 @@ impl GSV {
             (total_messages_number, message_number, sat_in_view)
         {
             Ok(Some(GSV {
+                source,
                 total_messages_number,
                 message_number,
                 sat_in_view,

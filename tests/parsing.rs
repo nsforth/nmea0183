@@ -257,6 +257,7 @@ fn test_correct_gsv() {
                 panic!("Unexpected ParseResult variant while parsing GSV data.");
             }
         };
+        assert_eq!(gsv.source, Source::GPS);
         assert_eq!(gsv.total_messages_number, 8);
         assert_eq!(gsv.message_number, 1);
         assert_eq!(gsv.sat_in_view, 25);
@@ -265,25 +266,25 @@ fn test_correct_gsv() {
             gsv.get_satellites(),
             [
                 satellite::Satellite {
-                    prn: satellite::Prn { number: 21 },
+                    prn: 21,
                     elevation: 44,
                     azimuth: 141,
                     snr: Some(47)
                 },
                 satellite::Satellite {
-                    prn: satellite::Prn { number: 15 },
+                    prn: 15,
                     elevation: 14,
                     azimuth: 49,
                     snr: Some(44)
                 },
                 satellite::Satellite {
-                    prn: satellite::Prn { number: 6 },
+                    prn: 6,
                     elevation: 31,
                     azimuth: 255,
                     snr: Some(46)
                 },
                 satellite::Satellite {
-                    prn: satellite::Prn { number: 3 },
+                    prn: 3,
                     elevation: 25,
                     azimuth: 280,
                     snr: Some(44)
@@ -305,6 +306,7 @@ fn test_correct_gsv2() {
                 panic!("Unexpected ParseResult variant while parsing GSV data.");
             }
         };
+        assert_eq!(gsv.source, Source::GLONASS);
         assert_eq!(gsv.total_messages_number, 8);
         assert_eq!(gsv.message_number, 7);
         assert_eq!(gsv.sat_in_view, 25);
@@ -312,13 +314,13 @@ fn test_correct_gsv2() {
         assert_eq!(
             gsv.get_satellites(),
             [satellite::Satellite {
-                prn: satellite::Prn { number: 4 },
+                prn: 68,
                 elevation: 37,
                 azimuth: 284,
                 snr: Some(50)
             },],
         )
-  }
+    }
 }
 #[test]
 fn test_correct_pmtk() {

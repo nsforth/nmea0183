@@ -16,11 +16,11 @@ pub struct GSA {
     fix_sats_prn: [u16; MAX_PRNS_PER_MESSAGE],
     /// The actual number of PRNs in the array.
     prn_array_size: usize,
-    /// Position dilution of precision
+    /// Position dilusion of precision.
     pub pdop: f32,
-    /// Horizontal dilusion of presicion.
+    /// Horizontal dilusion of precision.
     pub hdop: f32,
-    /// Vertical dilution of precision.
+    /// Vertical dilusion of precision.
     pub vdop: f32,
 }
 

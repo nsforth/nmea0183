@@ -83,7 +83,11 @@ use core::slice::Iter;
 pub(crate) mod common;
 pub mod coords;
 pub mod datetime;
+pub mod satellite;
+
 pub(crate) mod gga;
+pub(crate) mod gsv;
+
 pub(crate) mod gll;
 pub(crate) mod modes;
 pub(crate) mod mtk;
@@ -93,13 +97,13 @@ pub(crate) mod vtg;
 pub use gga::GPSQuality;
 pub use gga::GGA;
 pub use gll::GLL;
+pub use gsv::GSV;
 pub use modes::Mode;
 pub use mtk::JammingStatus;
 pub use mtk::MTKPacketType;
 pub use mtk::PMTKSPF;
 pub use rmc::RMC;
 pub use vtg::VTG;
-
 /// Source of NMEA sentence like GPS, GLONASS or other.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Source {
@@ -183,6 +187,8 @@ pub enum Sentence {
     GLL = 0b1000,
     /// MTK properitary messages.
     PMTK = 0b10000,
+    /// Satellites in views.
+    GSV = 0b100000,
 }
 
 impl TryFrom<&str> for Sentence {
@@ -194,6 +200,7 @@ impl TryFrom<&str> for Sentence {
             "GGA" => Ok(Sentence::GGA),
             "GLL" => Ok(Sentence::GLL),
             "VTG" => Ok(Sentence::VTG),
+            "GSV" => Ok(Sentence::GSV),
             "PMTK" => Ok(Sentence::PMTK),
             _ => Err("Unsupported sentence type."),
         }
@@ -250,6 +257,8 @@ pub enum ParseResult {
     GLL(Option<GLL>),
     /// The actual course and speed relative to the ground.
     VTG(Option<VTG>),
+    /// The satellites in views including the number of SVs in view, the PRN numbers, elevations, azimuths, and SNR values.
+    GSV(Option<GSV>),
     /// The MTK properitary messages.
     PMTK(Option<PMTKSPF>),
 }
@@ -425,6 +434,7 @@ impl Parser {
             Sentence::GGA => Ok(Some(ParseResult::GGA(GGA::parse(source, &mut iter)?))),
             Sentence::GLL => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
             Sentence::VTG => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
+            Sentence::GSV => Ok(Some(ParseResult::GSV(GSV::parse(source, &mut iter)?))),
             Sentence::PMTK => {
                 if sentence_field.len() < 7 {
                     return Err("PMTK Sentence field is too small. Must be 7 chars at least!");

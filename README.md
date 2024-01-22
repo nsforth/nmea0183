@@ -3,7 +3,7 @@
 [![Codecov coverage status](https://codecov.io/gh/nsforth/nmea0183/branch/master/graph/badge.svg)](https://codecov.io/gh/nsforth/nmea0183)
 # NMEA 0183 parser.
 
-Implemented most used sentences like RMC, VTG, GGA, GLL.
+Implemented most used sentences like RMC, VTG, GGA, GLL, GSV.
 Parser do not use heap memory and relies only on `core`.
 
 You should instantiate [Parser](https://docs.rs/nmea0183/latest/nmea0183/struct.Parser.html) with [new](https://docs.rs/nmea0183/latest/nmea0183/struct.Parser.html#method.new) and than use methods like [parse_from_byte](https://docs.rs/nmea0183/latest/nmea0183/struct.Parser.html#method.parse_from_bytes) or [parse_from_bytes](https://docs.rs/nmea0183/latest/nmea0183/struct.Parser.html#method.parse_from_bytes).
@@ -77,5 +77,5 @@ It's possible to got other very rare error messages that relates to protocol err
 
 # Planned features
 
-GSA and GSV parsing.
+GSA parsing.
 

@@ -1,6 +1,7 @@
 use core::convert::TryFrom;
 use nmea0183::coords;
 use nmea0183::datetime;
+use nmea0183::satellite;
 use nmea0183::GPSQuality;
 use nmea0183::JammingStatus;
 use nmea0183::Mode;
@@ -10,7 +11,6 @@ use nmea0183::PMTKSPF;
 use nmea0183::RMC;
 use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
-
 #[test]
 fn test_too_long_sentence() {
     let line = "$01234567890123456789012345678901234567890123456789012345678901234567890123456789";
@@ -245,6 +245,83 @@ fn test_correct_gll() {
     }
 }
 
+#[test]
+fn test_correct_gsv() {
+    let mut p = Parser::new();
+    let b = b"$GPGSV,8,1,25,21,44,141,47,15,14,049,44,6,31,255,46,3,25,280,44*75\r\n";
+    {
+        let mut iter = p.parse_from_bytes(&b[..]);
+        let gsv = match iter.next().unwrap().unwrap() {
+            ParseResult::GSV(Some(gsv)) => gsv,
+            _ => {
+                panic!("Unexpected ParseResult variant while parsing GSV data.");
+            }
+        };
+        assert_eq!(gsv.source, Source::GPS);
+        assert_eq!(gsv.total_messages_number, 8);
+        assert_eq!(gsv.message_number, 1);
+        assert_eq!(gsv.sat_in_view, 25);
+
+        assert_eq!(
+            gsv.get_in_view_satellites(),
+            [
+                satellite::Satellite {
+                    prn: 21,
+                    elevation: 44,
+                    azimuth: 141,
+                    snr: Some(47)
+                },
+                satellite::Satellite {
+                    prn: 15,
+                    elevation: 14,
+                    azimuth: 49,
+                    snr: Some(44)
+                },
+                satellite::Satellite {
+                    prn: 6,
+                    elevation: 31,
+                    azimuth: 255,
+                    snr: Some(46)
+                },
+                satellite::Satellite {
+                    prn: 3,
+                    elevation: 25,
+                    azimuth: 280,
+                    snr: Some(44)
+                }
+            ],
+        )
+    }
+}
+
+#[test]
+fn test_correct_gsv2() {
+    let mut p = Parser::new();
+    let b = b"$GLGSV,8,7,25,68,37,284,50*5C\r\n";
+    {
+        let mut iter = p.parse_from_bytes(&b[..]);
+        let gsv = match iter.next().unwrap().unwrap() {
+            ParseResult::GSV(Some(gsv)) => gsv,
+            _ => {
+                panic!("Unexpected ParseResult variant while parsing GSV data.");
+            }
+        };
+        assert_eq!(gsv.source, Source::GLONASS);
+        assert_eq!(gsv.total_messages_number, 8);
+        assert_eq!(gsv.message_number, 7);
+        assert_eq!(gsv.sat_in_view, 25);
+
+        assert_eq!(
+            gsv.get_in_view_satellites(),
+            [satellite::Satellite {
+                prn: 68,
+                elevation: 37,
+                azimuth: 284,
+                snr: Some(50)
+            },],
+        )
+    }
+}
 #[test]
 fn test_correct_pmtk() {
     let mut p = Parser::new();

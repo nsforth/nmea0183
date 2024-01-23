@@ -86,6 +86,7 @@ pub mod datetime;
 pub mod satellite;
 
 pub(crate) mod gga;
+pub(crate) mod gsa;
 pub(crate) mod gsv;
 
 pub(crate) mod gll;
@@ -97,6 +98,8 @@ pub(crate) mod vtg;
 pub use gga::GPSQuality;
 pub use gga::GGA;
 pub use gll::GLL;
+pub use gsa::FixType;
+pub use gsa::GSA;
 pub use gsv::GSV;
 pub use modes::Mode;
 pub use mtk::JammingStatus;
@@ -189,6 +192,8 @@ pub enum Sentence {
     PMTK = 0b10000,
     /// Satellites in views.
     GSV = 0b100000,
+    /// GPS DOP and active satellites.
+    GSA = 0b1000000,
 }
 
 impl TryFrom<&str> for Sentence {
@@ -202,6 +207,7 @@ impl TryFrom<&str> for Sentence {
             "VTG" => Ok(Sentence::VTG),
             "GSV" => Ok(Sentence::GSV),
             "PMTK" => Ok(Sentence::PMTK),
+            "GSA" => Ok(Sentence::GSA),
             _ => Err("Unsupported sentence type."),
         }
     }
@@ -261,6 +267,8 @@ pub enum ParseResult {
     GSV(Option<GSV>),
     /// The MTK properitary messages.
     PMTK(Option<PMTKSPF>),
+    /// The GPS DOP and active satellites. Provides information about the DOP and the active satellites used for the current fix.
+    GSA(Option<GSA>),
 }
 
 /// Parses NMEA sentences and stores intermediate parsing state.
@@ -435,6 +443,7 @@ impl Parser {
             Sentence::GLL => Ok(Some(ParseResult::GLL(GLL::parse(source, &mut iter)?))),
             Sentence::VTG => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
             Sentence::GSV => Ok(Some(ParseResult::GSV(GSV::parse(source, &mut iter)?))),
+            Sentence::GSA => Ok(Some(ParseResult::GSA(GSA::parse(source, &mut iter)?))),
             Sentence::PMTK => {
                 if sentence_field.len() < 7 {
                     return Err("PMTK Sentence field is too small. Must be 7 chars at least!");

@@ -91,6 +91,7 @@ pub(crate) mod gsv;
 
 pub(crate) mod gll;
 pub(crate) mod modes;
+#[cfg(feature = "mtk")]
 pub(crate) mod mtk;
 pub(crate) mod rmc;
 pub(crate) mod vtg;
@@ -102,8 +103,11 @@ pub use gsa::FixType;
 pub use gsa::GSA;
 pub use gsv::GSV;
 pub use modes::Mode;
+#[cfg(feature = "mtk")]
 pub use mtk::JammingStatus;
+#[cfg(feature = "mtk")]
 pub use mtk::MTKPacketType;
+#[cfg(feature = "mtk")]
 pub use mtk::PMTKSPF;
 pub use rmc::RMC;
 pub use vtg::VTG;
@@ -120,6 +124,7 @@ pub enum Source {
     Beidou = 0b1000,
     /// Global Navigation Sattelite System. Some combination of other systems. Depends on receiver model, receiver settings, etc..
     GNSS = 0b10000,
+    #[cfg(feature = "mtk")]
     /// MediaTek NMEA packet protocol
     MTK = 0b100000,
 }
@@ -170,7 +175,8 @@ impl TryFrom<&str> for Source {
             "GL" => Ok(Source::GLONASS),
             "GA" => Ok(Source::Gallileo),
             "BD" => Ok(Source::Beidou),
-            "GN" => Ok(Source::GNSS),
+            "GN" => Ok(Source::GNSS),   
+            #[cfg(feature = "mtk")]     
             "PM" => Ok(Source::MTK),
             _ => Err("Source is not supported!"),
         }
@@ -188,6 +194,7 @@ pub enum Sentence {
     GGA = 0b100,
     /// Geographic latitude ang longitude sentence with time of fix and receiver state.
     GLL = 0b1000,
+    #[cfg(feature = "mtk")]
     /// MTK properitary messages.
     PMTK = 0b10000,
     /// Satellites in views.
@@ -206,6 +213,7 @@ impl TryFrom<&str> for Sentence {
             "GLL" => Ok(Sentence::GLL),
             "VTG" => Ok(Sentence::VTG),
             "GSV" => Ok(Sentence::GSV),
+            #[cfg(feature = "mtk")]
             "PMTK" => Ok(Sentence::PMTK),
             "GSA" => Ok(Sentence::GSA),
             _ => Err("Unsupported sentence type."),
@@ -265,6 +273,7 @@ pub enum ParseResult {
     VTG(Option<VTG>),
     /// The satellites in views including the number of SVs in view, the PRN numbers, elevations, azimuths, and SNR values.
     GSV(Option<GSV>),
+    #[cfg(feature = "mtk")]
     /// The MTK properitary messages.
     PMTK(Option<PMTKSPF>),
     /// The GPS DOP and active satellites. Provides information about the DOP and the active satellites used for the current fix.
@@ -430,6 +439,7 @@ impl Parser {
         }
 
         let sentence = match source {
+            #[cfg(feature = "mtk")]
             Source::MTK => Sentence::try_from(&sentence_field[0..4])?,
             _ => Sentence::try_from(&sentence_field[2..5])?,
         };
@@ -444,6 +454,7 @@ impl Parser {
             Sentence::VTG => Ok(Some(ParseResult::VTG(VTG::parse(source, &mut iter)?))),
             Sentence::GSV => Ok(Some(ParseResult::GSV(GSV::parse(source, &mut iter)?))),
             Sentence::GSA => Ok(Some(ParseResult::GSA(GSA::parse(source, &mut iter)?))),
+            #[cfg(feature = "mtk")]
             Sentence::PMTK => {
                 if sentence_field.len() < 7 {
                     return Err("PMTK Sentence field is too small. Must be 7 chars at least!");

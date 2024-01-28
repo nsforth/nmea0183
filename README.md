@@ -1,5 +1,5 @@
-[![Crates.io](https://img.shields.io/badge/crates.io-v0.3.1-orange.svg?longCache=true)](https://crates.io/crates/nmea0183)
-[![Build Status](https://travis-ci.org/nsforth/nmea0183.svg?tag=v0.3.1)](https://travis-ci.org/nsforth/nmea0183)
+[![Crates.io](https://img.shields.io/badge/crates.io-v0.4.0-orange.svg?longCache=true)](https://crates.io/crates/nmea0183)
+[![Build Status](https://travis-ci.org/nsforth/nmea0183.svg?tag=v0.4.0)](https://travis-ci.org/nsforth/nmea0183)
 [![Codecov coverage status](https://codecov.io/gh/nsforth/nmea0183/branch/master/graph/badge.svg)](https://codecov.io/gh/nsforth/nmea0183)
 # NMEA 0183 parser.
 
@@ -10,6 +10,10 @@ You should instantiate [Parser](https://docs.rs/nmea0183/latest/nmea0183/struct.
 If parser accumulates enough data it will return [ParseResult](https://docs.rs/nmea0183/latest/nmea0183/enum.ParseResult.html) on success or `&str` that describing an error.
 
 You do not need to do any preprocessing such as split data to strings or NMEA sentences.
+
+# Optional features
+
+Parser supports Mediatek-related PMTKSPF non-standard sentence. It is disabled by default. Use "mtk" feature if you need it.
 
 # Examples
 

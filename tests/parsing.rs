@@ -17,8 +17,27 @@ use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
 
 #[test]
+#[cfg(feature = "strict")]
 fn test_too_long_sentence() {
     let line = "$01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    let mut caught_error = false;
+    for result in Parser::new().parse_from_bytes(line.as_bytes()) {
+        match result {
+            Ok(_) => continue,
+            Err("NMEA sentence is too long!") => {
+                caught_error = true;
+                break;
+            }
+            Err(_) => panic!("Unexpected error caught in test!"),
+        }
+    }
+    assert!(caught_error);
+}
+
+#[test]
+#[cfg(not(feature = "strict"))]
+fn test_too_long_sentence_non_strict() {
+    let line = "$01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890012345678901234567890";
     let mut caught_error = false;
     for result in Parser::new().parse_from_bytes(line.as_bytes()) {
         match result {

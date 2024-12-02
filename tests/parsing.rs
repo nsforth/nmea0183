@@ -1,5 +1,8 @@
 use core::convert::TryFrom;
 use nmea0183::coords;
+use nmea0183::coords::Hemisphere;
+use nmea0183::coords::Latitude;
+use nmea0183::coords::Longitude;
 use nmea0183::datetime;
 use nmea0183::satellite;
 use nmea0183::FixType;
@@ -12,6 +15,7 @@ use nmea0183::PMTKSPF;
 use nmea0183::RMC;
 use nmea0183::VTG;
 use nmea0183::{ParseResult, Parser, Source};
+
 #[test]
 fn test_too_long_sentence() {
     let line = "$01234567890123456789012345678901234567890123456789012345678901234567890123456789";
@@ -171,8 +175,53 @@ fn test_correct_gga() {
                     gps_quality: GPSQuality::DGPS,
                     sat_in_use: 7,
                     hdop: 0.6,
-                    altitude: coords::Altitude { meters: 9.0 },
+                    altitude: Some(coords::Altitude { meters: 9.0 }),
                     geoidal_separation: Some(18.0),
+                    age_dgps: None,
+                    dgps_station_id: None
+                })))
+            );
+            parsed = true;
+            break;
+        }
+    }
+    assert!(parsed);
+}
+
+#[test]
+fn test_correct_gga_without_altitude() {
+    let mut p = Parser::new();
+    let sentence = b"$GPGGA,160545,5008.6263,N,01422.4224,E,1,03,3.6,,M,45.0,M,,*61\r\n";
+    let mut parsed = false;
+    for b in sentence.iter() {
+        let r = p.parse_from_byte(*b);
+        if r.is_some() {
+            assert_eq!(
+                r.unwrap(),
+                Ok(ParseResult::GGA(Some(GGA {
+                    source: Source::GPS,
+                    time: datetime::Time {
+                        hours: 16,
+                        minutes: 5,
+                        seconds: 45.0
+                    },
+                    latitude: Latitude {
+                        degrees: 50,
+                        minutes: 8,
+                        seconds: 37.578,
+                        hemisphere: Hemisphere::North
+                    },
+                    longitude: Longitude {
+                        degrees: 14,
+                        minutes: 22,
+                        seconds: 25.344,
+                        hemisphere: Hemisphere::East
+                    },
+                    gps_quality: GPSQuality::GPS,
+                    sat_in_use: 3,
+                    hdop: 3.6,
+                    altitude: None,
+                    geoidal_separation: Some(45.0),
                     age_dgps: None,
                     dgps_station_id: None
                 })))

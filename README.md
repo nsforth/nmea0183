@@ -1,4 +1,4 @@
-[![Crates.io](https://img.shields.io/badge/crates.io-v0.4.0-orange.svg?longCache=true)](https://crates.io/crates/nmea0183)
+[![Crates.io](https://img.shields.io/badge/crates.io-v0.5.0-orange.svg?longCache=true)](https://crates.io/crates/nmea0183)
 [![master](https://github.com/nsforth/nmea0183/actions/workflows/rust.yml/badge.svg)](https://github.com/nsforth/nmea0183/actions/workflows/rust.yml)
 # NMEA 0183 parser.
 
@@ -13,7 +13,8 @@ You do not need to do any preprocessing such as split data to strings or NMEA se
 # Optional features
 
 Parser supports Mediatek-related PMTKSPF non-standard sentence. It is disabled by default. Use "mtk" feature if you need it.
-If your receives somehow violates NMEA spec, try disable "strict" feature which enabled by default. For example, without "strict" feauture sentence size is set to 120 chars instead of standart NMEA 79 chars.
+
+If your receiver somehow violates NMEA spec, try disable "strict" feature which enabled by default. For example, without "strict" feauture sentence size is set to 120 chars instead of standart NMEA 79 chars.
 
 # Examples
 

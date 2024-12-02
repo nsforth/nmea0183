@@ -14,12 +14,13 @@ readme = "README.md"
 [dependencies]
 
 [features]
-default = []
+default = ["strict"]
 mtk = []
+strict = []
 
 [badges]
 travis-ci = { repository = "nsforth/nmea0183", branch = "v0.4.0" }
-codecov = { repository = "nsforth/nmea0183"}
+codecov = { repository = "nsforth/nmea0183" }
 is-it-maintained-issue-resolution = { repository = "nsforth/nmea0183" }
 is-it-maintained-open-issues = { repository = "nsforth/nmea0183" }
 maintenance = { status = "actively-developed" }

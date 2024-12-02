@@ -13,6 +13,7 @@ You do not need to do any preprocessing such as split data to strings or NMEA se
 # Optional features
 
 Parser supports Mediatek-related PMTKSPF non-standard sentence. It is disabled by default. Use "mtk" feature if you need it.
+If your receives somehow violates NMEA spec, try disable "strict" feature which enabled by default. For example, without "strict" feauture sentence size is set to 120 chars instead of standart NMEA 79 chars.
 
 # Examples
 
@@ -77,5 +78,3 @@ Should not panic. If so please report issue on project page.
 `NMEA format error!` - Possible data corruption. Parser drops all accumulated data and starts seek new sentences.
 
 It's possible to got other very rare error messages that relates to protocol errors. Receivers nowadays mostly do not violate NMEA specs.
-
-

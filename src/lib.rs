@@ -175,8 +175,8 @@ impl TryFrom<&str> for Source {
             "GL" => Ok(Source::GLONASS),
             "GA" => Ok(Source::Gallileo),
             "BD" => Ok(Source::Beidou),
-            "GN" => Ok(Source::GNSS),   
-            #[cfg(feature = "mtk")]     
+            "GN" => Ok(Source::GNSS),
+            #[cfg(feature = "mtk")]
             "PM" => Ok(Source::MTK),
             _ => Err("Source is not supported!"),
         }
@@ -280,10 +280,18 @@ pub enum ParseResult {
     GSA(Option<GSA>),
 }
 
+#[cfg(feature = "strict")]
+/// Maximum allowed sentence length, according to NMEA 183 docs should be not more than 79 chars. Disable strict feature to parse up to 120 chars.
+pub const MAX_SENTENCE_LENGTH: usize = 79usize;
+
+#[cfg(not(feature = "strict"))]
+/// Maximum allowed sentence length.
+pub const MAX_SENTENCE_LENGTH: usize = 120usize;
+
 /// Parses NMEA sentences and stores intermediate parsing state.
 /// Parser is tolerant for errors so you should not reinitialize it after errors.
 pub struct Parser {
-    buffer: [u8; 79],
+    buffer: [u8; MAX_SENTENCE_LENGTH],
     buflen: usize,
     chksum: u8,
     expected_chksum: u8,
@@ -334,7 +342,7 @@ impl Parser {
     /// Constructs new Parser.
     pub fn new() -> Parser {
         Parser {
-            buffer: [0u8; 79],
+            buffer: [0u8; MAX_SENTENCE_LENGTH],
             buflen: 0,
             chksum: 0,
             expected_chksum: 0,

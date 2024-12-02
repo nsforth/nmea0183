@@ -22,7 +22,7 @@ pub struct GGA {
     /// Horizontal dilusion of presicion. Indicates precision of solution.
     pub hdop: f32,
     /// Altitude over ground, typically WGS-84.
-    pub altitude: Altitude,
+    pub altitude: Option<Altitude>,
     /// The difference between reference ellipsoid surface and mean-sea-level.
     pub geoidal_separation: Option<f32>,
     /// DGPS data age. None if DGPS not in use.
@@ -56,16 +56,8 @@ impl GGA {
             Some(gps_quality),
             Some(sat_in_use),
             Some(hdop),
-            Some(altitude),
-        ) = (
-            time,
-            latitude,
-            longitude,
-            gps_quality,
-            sat_in_use,
-            hdop,
-            altitude,
-        ) {
+        ) = (time, latitude, longitude, gps_quality, sat_in_use, hdop)
+        {
             Ok(Some(GGA {
                 source,
                 time,

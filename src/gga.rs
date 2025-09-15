@@ -5,6 +5,7 @@ use crate::Source;
 use core::time::Duration;
 
 /// geographic coordinates including altitude, gps solution quality, dgps usage information
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct GGA {
     /// Navigational system.
@@ -99,29 +100,6 @@ pub enum GPSQuality {
     Manual,
     /// Simulated.
     Simulated,
-}
-
-#[cfg(feature = "defmt")]
-impl defmt::Format for GGA {
-    fn format(&self, f: defmt::Formatter) {
-        // format age_dgps as milliseconds to avoid formatting core::time::Duration directly
-        let age_ms: Option<u64> = self.age_dgps.map(|d| d.as_secs().saturating_mul(1000) + u64::from(d.subsec_millis()));
-        defmt::write!(
-            f,
-            "GGA {{ source: {}, time: {}, latitude: {}, longitude: {}, gps_quality: {}, sat_in_use: {}, hdop: {}, altitude: {}, geoidal_separation: {}, age_dgps_ms: {}, dgps_station_id: {} }}",
-            self.source,
-            self.time,
-            self.latitude,
-            self.longitude,
-            self.gps_quality,
-            self.sat_in_use,
-            self.hdop,
-            self.altitude,
-            self.geoidal_separation,
-            age_ms,
-            self.dgps_station_id
-        );
-    }
 }
 
 impl GPSQuality {

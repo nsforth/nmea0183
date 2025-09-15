@@ -1,6 +1,6 @@
 [package]
 name = "nmea0183"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Nikita Staroverov <nsforth@gmail.com>"]
 edition = "2018"
 description = "NMEA 0183 parser targetting mostly embedded devices but not limited to."

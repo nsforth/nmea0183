@@ -111,7 +111,8 @@ pub use mtk::MTKPacketType;
 pub use mtk::PMTKSPF;
 pub use rmc::RMC;
 pub use vtg::VTG;
-/// Source of NMEA sentence like GPS, GLONASS or other.
+/// source of nmea sentence like gps, glonass or other
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Source {
     /// USA Global Positioning System
@@ -129,7 +130,8 @@ pub enum Source {
     MTK = 0b100000,
 }
 
-/// Mask for Source filter in Parser.
+/// mask for source filter in parser
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct SourceMask {
     mask: u32,
 }
@@ -183,7 +185,8 @@ impl TryFrom<&str> for Source {
     }
 }
 
-/// Various kinds of NMEA sentence like RMC, VTG or other. Used for filter by sentence type in Parser.
+/// various kinds of nmea sentence like rmc, vtg or other. used for filter by sentence type in parser
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, Copy, Clone)]
 pub enum Sentence {
     /// Recommended minimum sentence.
@@ -221,7 +224,8 @@ impl TryFrom<&str> for Sentence {
     }
 }
 
-/// Mask for Sentence filter in Parser.
+/// mask for sentence filter in parser
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct SentenceMask {
     mask: u32,
 }
@@ -258,9 +262,8 @@ impl BitOr<Sentence> for SentenceMask {
     }
 }
 
-/// The NMEA sentence parsing result.
-/// Sentences with many null fields or sentences without valid data is also parsed and returned as None.
-/// None ParseResult may be interpreted as working receiver but without valid data.
+/// the nmea sentence parsing result. sentences with many null fields or sentences without valid data are parsed and returned as none. none can indicate working receiver without valid data
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParseResult {
     /// The Recommended Minimum Sentence for any GNSS. Typically most used.

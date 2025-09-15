@@ -12,11 +12,13 @@ categories = ["embedded", "no-std", "parser-implementations"]
 readme = "README.md"
 
 [dependencies]
+defmt = { version = "1.0.1", optional = true }
 
 [features]
 default = ["strict"]
 mtk = []
 strict = []
+defmt = ["dep:defmt"]
 
 [badges]
 travis-ci = { repository = "nsforth/nmea0183", branch = "v0.5.0" }

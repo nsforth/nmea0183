@@ -2,7 +2,8 @@ use crate::coords::{Course, MagneticCourse, Speed};
 use crate::modes::Mode;
 use crate::Source;
 
-/// The actual course and speed relative to the ground.
+/// the actual course and speed relative to the ground
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct VTG {
     /// Navigational system.

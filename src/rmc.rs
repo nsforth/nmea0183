@@ -3,7 +3,8 @@ use crate::datetime::{Date, DateTime, Time};
 use crate::modes::{Mode, Status};
 use crate::Source;
 
-/// Recommended Minimum Sentence for any GNSS source.
+/// recommended minimum sentence for any gnss source
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct RMC {
     /// Navigational system.

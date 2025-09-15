@@ -1,3 +1,4 @@
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq)]
 pub(crate) enum Status {
     Valid,
@@ -14,7 +15,8 @@ impl Status {
     }
 }
 
-/// Receiver mode of operation.
+/// receiver mode of operation
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub enum Mode {
     /// Autonomous mode without any external correction.

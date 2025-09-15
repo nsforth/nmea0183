@@ -2,6 +2,7 @@
 use core::convert::TryFrom;
 
 /// Earth hemisphere
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub enum Hemisphere {
     /// North
@@ -15,6 +16,7 @@ pub enum Hemisphere {
 }
 
 /// Latitude as reported by receiver.
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Latitude {
     /// Degrees
@@ -121,6 +123,7 @@ impl Latitude {
 }
 
 /// Longitude as reported by receiver.
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Longitude {
     /// Degrees
@@ -227,6 +230,7 @@ impl Longitude {
 }
 
 /// Altitude reported by receiver typically in GGA sentence.
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Altitude {
     /// Altitude in meters over ground.
@@ -248,6 +252,7 @@ impl Altitude {
 }
 
 /// Speed reported by receiver typically in RMC and VTG sentences.
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Speed {
     knots: f32,
@@ -305,6 +310,7 @@ impl Speed {
 }
 
 /// The course over ground.
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Course {
     /// Course in degrees from North rotated clockwise.
@@ -331,6 +337,7 @@ impl Course {
 }
 
 /// The course over ground calculated from True course and magnetic variation.
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct MagneticCourse {
     /// Course in degrees from Magnetic North Pole rotated clockwise.

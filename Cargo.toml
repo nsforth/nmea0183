@@ -12,11 +12,15 @@ categories = ["embedded", "no-std", "parser-implementations"]
 readme = "README.md"
 
 [dependencies]
+defmt = { version = "1", optional = true }
+heapless = { version = "0.9", optional = true }
 
 [features]
 default = ["strict"]
 mtk = []
+txt = ["dep:heapless"]
 strict = []
+defmt = ["dep:defmt"]
 
 [badges]
 codecov = { repository = "nsforth/nmea0183" }

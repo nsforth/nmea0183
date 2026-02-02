@@ -4,7 +4,8 @@ use crate::Source;
 const MAX_PRNS_PER_MESSAGE: usize = 12;
 
 /// GPS DOP and active satellites
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct GSA {
     /// Navigational system.
     pub source: Source,
@@ -65,7 +66,8 @@ impl GSA {
 }
 
 /// Receiver mode of positioning.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum FixType {
     /// No valid position is available.
     NoFix,

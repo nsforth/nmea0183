@@ -2,7 +2,8 @@
 use core::convert::TryFrom;
 
 /// Earth hemisphere
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Hemisphere {
     /// North
     North,
@@ -15,7 +16,8 @@ pub enum Hemisphere {
 }
 
 /// Latitude as reported by receiver.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Latitude {
     /// Degrees
     pub degrees: u8,
@@ -121,7 +123,8 @@ impl Latitude {
 }
 
 /// Longitude as reported by receiver.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Longitude {
     /// Degrees
     pub degrees: u8,
@@ -227,7 +230,8 @@ impl Longitude {
 }
 
 /// Altitude reported by receiver typically in GGA sentence.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Altitude {
     /// Altitude in meters over ground.
     pub meters: f32,
@@ -248,7 +252,8 @@ impl Altitude {
 }
 
 /// Speed reported by receiver typically in RMC and VTG sentences.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Speed {
     knots: f32,
 }
@@ -305,7 +310,8 @@ impl Speed {
 }
 
 /// The course over ground.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Course {
     /// Course in degrees from North rotated clockwise.
     pub degrees: f32,
@@ -331,10 +337,11 @@ impl Course {
 }
 
 /// The course over ground calculated from True course and magnetic variation.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct MagneticCourse {
     /// Course in degrees from Magnetic North Pole rotated clockwise.
-    degrees: f32,
+    pub degrees: f32,
 }
 
 impl From<f32> for MagneticCourse {

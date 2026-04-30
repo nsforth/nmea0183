@@ -177,7 +177,7 @@ impl TryFrom<&str> for Source {
             "GP" => Ok(Source::GPS),
             "GL" => Ok(Source::GLONASS),
             "GA" => Ok(Source::Gallileo),
-            "BD" => Ok(Source::Beidou),
+            "GB" | "BD" => Ok(Source::Beidou),
             "GN" => Ok(Source::GNSS),
             #[cfg(feature = "mtk")]
             "PM" => Ok(Source::MTK),

@@ -53,12 +53,13 @@ jobs:
       - name: Generate coverage with grcov
         run: |
           cargo install grcov || true
-          grcov . -t sourceless --output-directory ./coverage
+          grcov . -s . --binary-path ./target/debug/ -t lcov --branch --ignore-not-existing -o lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          folder: ./coverage
+          search-root: .
+          file: lcov.info
 
   lint:
     runs-on: ubuntu-latest

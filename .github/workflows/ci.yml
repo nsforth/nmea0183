@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+        variant:
+          - no-default-features
+          - default
+          - strict-only
+          - mtk-only
+          - mtk-plus-strict
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: rustup override set ${{ matrix.toolchain }}
+
+      - name: Run tests
+        run: |
+          case '${{ matrix.variant }}' in
+            no-default-features) cargo test --verbose --no-default-features ;;
+            default)              cargo test --verbose ;;
+            strict-only)         cargo test --verbose --features strict ;;
+            mtk-only)            cargo test --verbose --features mtk ;;
+            mtk-plus-strict)     cargo test --verbose --features mtk,strict ;;
+          esac
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: rustup override set stable
+
+      - name: Run tests to generate llvm-cov data
+        run: cargo test --output-mode=human
+
+      - name: Generate coverage with grcov
+        run: |
+          cargo install grcov || true
+          grcov . -t sourceless --cargo-localworkdir --output-directory ./coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          folder: ./coverage
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run clippy
+        run: cargo clippy --all-targets
+
+      - name: Check formatting
+        run: cargo fmt --check

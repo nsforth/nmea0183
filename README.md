@@ -1,5 +1,5 @@
 [![Crates.io](https://img.shields.io/badge/crates.io-v0.6.0-orange.svg?longCache=true)](https://crates.io/crates/nmea0183)
-[![master](https://github.com/nsforth/nmea0183/actions/workflows/rust.yml/badge.svg)](https://github.com/nsforth/nmea0183/actions/workflows/rust.yml)
+[![master](https://github.com/nsforth/nmea0183/actions/workflows/ci.yml/badge.svg)](https://github.com/nsforth/nmea0183/actions/workflows/ci.yml)
 # NMEA 0183 parser.
 
 Implemented most used sentences like RMC, VTG, GGA, GLL, GSV, GSA, ZDA.

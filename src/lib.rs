@@ -1,10 +1,10 @@
 #![no_std]
 #![warn(missing_docs)]
 //! NMEA 0183 parser. Implemented most used sentences like RMC, VTG, GGA, GLL.
-//! Parser do not use heap memory and relies only on `core`.
+//! It does not use heap memory and relies only on `core`.
 //!
-//! You should instantiate [Parser](struct.Parser.html) with [new](struct.Parser.html#method.new) and than use methods like [parse_from_byte](struct.Parser.html#method.parse_from_bytes) or [parse_from_bytes](struct.Parser.html#method.parse_from_bytes).
-//! If parser accumulates enough data it will return [ParseResult](enum.ParseResult.html) on success or `&str` that describing an error.
+//! You should instantiate [Parser](struct.Parser.html) with [new](struct.Parser.html#method.new) and then use methods like [parse_from_byte](struct.Parser.html#method.parse_from_byte) or [parse_from_bytes](struct.Parser.html#method.parse_from_bytes).
+//! If parser accumulates enough data it will return [ParseResult](enum.ParseResult.html) on success or `&str` that describes an error.
 //!
 //! You do not need to do any preprocessing such as split data to strings or NMEA sentences.
 //!
@@ -125,7 +125,7 @@ pub enum Source {
     Gallileo = 0b100,
     /// China's Beidou
     Beidou = 0b1000,
-    /// Global Navigation Sattelite System. Some combination of other systems. Depends on receiver model, receiver settings, etc..
+    /// Global Navigation Satellite System. Some combination of other systems. Depends on receiver model, receiver settings, etc..
     GNSS = 0b10000,
     #[cfg(feature = "mtk")]
     /// MediaTek NMEA packet protocol
@@ -195,7 +195,7 @@ pub enum Sentence {
     VTG = 0b10,
     /// Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
     GGA = 0b100,
-    /// Geographic latitude ang longitude sentence with time of fix and receiver state.
+    /// Geographic latitude and longitude sentence with time of fix and receiver state.
     GLL = 0b1000,
     #[cfg(feature = "mtk")]
     /// MTK properitary messages.
@@ -274,7 +274,7 @@ pub enum ParseResult {
     RMC(Option<RMC>),
     /// The Geographic coordinates including altitude, GPS solution quality, DGPS usage information.
     GGA(Option<GGA>),
-    /// The Geographic latitude ang longitude sentence with time of fix and the receiver state.
+    /// The Geographic latitude and longitude sentence with time of fix and the receiver state.
     GLL(Option<GLL>),
     /// The actual course and speed relative to the ground.
     VTG(Option<VTG>),

@@ -3,7 +3,7 @@ use crate::datetime::Time;
 use crate::modes::{Mode, Status};
 use crate::Source;
 
-/// Geographic latitude ang longitude sentence with time of fix and receiver state.
+/// Geographic latitude and longitude sentence with time of fix and receiver state.
 #[derive(Debug, PartialEq, Clone)]
 pub struct GLL {
     /// Navigational system.
@@ -12,7 +12,7 @@ pub struct GLL {
     pub time: Time,
     /// Latitude in reference datum, mostly WGS-84.
     pub latitude: Latitude,
-    /// Logitude in reference datum, mostly WGS-84.
+    /// Longitude in reference datum, mostly WGS-84.
     pub longitude: Longitude,
     /// Receiver's mode of operation.
     pub mode: Mode,

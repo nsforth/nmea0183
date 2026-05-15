@@ -46,7 +46,7 @@ impl PMTKSPF {
 }
 
 /// Status of gps Jamming
-#[derive(Debug, PartialEq, Clone,Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum JammingStatus {
     /// No Jamming
     Healthy,

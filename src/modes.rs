@@ -32,7 +32,7 @@ pub enum Mode {
 }
 
 impl Mode {
-    /// Position data shoud be valid if true
+    /// Position data should be valid if true
     pub fn is_valid(&self) -> bool {
         match self {
             Mode::Autonomous => true,
@@ -51,7 +51,7 @@ impl Mode {
             Some("M") => Ok(Mode::Manual),
             Some("S") => Ok(Mode::Simulator),
             Some("N") => Ok(Mode::NotValid),
-            None => Err("Mode field shoud not be null!"),
+            None => Err("Mode field should not be null!"),
             Some("") => Err("Mode should not be empty string!"),
             _ => Err("Wrong mode character!"),
         }

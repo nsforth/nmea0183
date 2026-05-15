@@ -7,7 +7,7 @@ use crate::Source;
 pub struct VTG {
     /// Navigational system.
     pub source: Source,
-    /// Course over ground. Some receivers do not reports it when no movement.
+    /// Course over ground. Some receivers does not report it when no movement.
     pub course: Option<Course>,
     /// Magnetic course over ground (angle to magnetic North pole).
     pub magnetic: Option<MagneticCourse>,

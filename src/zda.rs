@@ -1,7 +1,7 @@
 use crate::datetime::{Date, DateTime, Time};
 use crate::{common, Source};
 
-/// Geographic latitude ang longitude sentence with time of fix and receiver state.
+/// Date and Time sentence with UTC time information.
 #[derive(Debug, PartialEq, Clone)]
 pub struct ZDA {
     /// Navigational system.

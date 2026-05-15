@@ -13,13 +13,13 @@ pub struct GGA {
     pub time: Time,
     /// Latitude in reference datum, typically WGS-84.
     pub latitude: Latitude,
-    /// Logitude in reference datum, typically WGS-84.
+    /// Longitude in reference datum, typically WGS-84.
     pub longitude: Longitude,
     /// Quality of GPS solution.
     pub gps_quality: GPSQuality,
-    /// Sattelites in use
+    /// Satellites in use
     pub sat_in_use: u8,
-    /// Horizontal dilusion of presicion. Indicates precision of solution.
+    /// Horizontal dilution of precision. Indicates precision of solution.
     pub hdop: f32,
     /// Altitude over ground, typically WGS-84.
     pub altitude: Option<Altitude>,

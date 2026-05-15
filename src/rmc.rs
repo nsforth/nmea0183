@@ -12,7 +12,7 @@ pub struct RMC {
     pub datetime: DateTime,
     /// Latitude in reference datum, mostly WGS-84.
     pub latitude: Latitude,
-    /// Logitude in reference datum, mostly WGS-84.
+    /// Longitude in reference datum, mostly WGS-84.
     pub longitude: Longitude,
     /// Speed over ground.
     pub speed: Speed,
